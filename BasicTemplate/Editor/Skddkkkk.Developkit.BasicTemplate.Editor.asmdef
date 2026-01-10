@@ -1,0 +1,19 @@
+{
+    "name": "Skddkkkk.Developkit.BasicTemplate.Editor",
+    "rootNamespace": "Skddkkkk.DevelopKit.BasicTemplate.Editor",
+    "references": [
+        "Unity.Addressables.Editor",
+        "Skddkkkk.Developkit.BasicTemplate.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
