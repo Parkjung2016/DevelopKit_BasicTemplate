@@ -3,6 +3,10 @@ on:
   push:
     branches:
     - master
+    
+permissions:
+  contents: write 
+  
 jobs:
   semantic-release:
     runs-on: ubuntu-latest
