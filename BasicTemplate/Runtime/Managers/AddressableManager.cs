@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+#if UNITASK_INSTALLED
 using Cysharp.Threading.Tasks;
+#endif
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -87,6 +89,8 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
         }
 
         #endregion
+        
+#if UNITASK_INSTALLED
 
         #region addressable
 
@@ -110,7 +114,6 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
             _resourcesByName.TryAdd(key, loadedResource);
             return result;
         }
-
 
         public static async UniTask LoadALlAsync<T>(string label, OnResourceLoaded callBack = null, Action OnResourceAllLoaded=null)
             where T : Object
@@ -184,5 +187,6 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
         }
 
         #endregion
+        #endif
     }
 }

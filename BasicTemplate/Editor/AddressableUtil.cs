@@ -4,7 +4,7 @@ using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using System.Collections.Generic;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Editor
+namespace Skddkkkk.DevelopKit.BasicTemplate.Editors
 {
     public static class AddressableUtil
     {

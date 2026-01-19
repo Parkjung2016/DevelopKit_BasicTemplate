@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Editor
+namespace Skddkkkk.DevelopKit.BasicTemplate.Editors
 {
     [InitializeOnLoad]
     public class EditorStartInit

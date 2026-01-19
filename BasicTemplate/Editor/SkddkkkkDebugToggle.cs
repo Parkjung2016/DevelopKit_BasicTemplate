@@ -4,7 +4,7 @@ using UnityEditor.Build;
 using System.Linq;
 using UnityEngine;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Editor
+namespace Skddkkkk.DevelopKit.BasicTemplate.Editors
 {
     [InitializeOnLoad]
     public static class SkddkkkkDebugToggle

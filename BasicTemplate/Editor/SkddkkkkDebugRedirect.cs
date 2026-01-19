@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Editor
+namespace Skddkkkk.DevelopKit.BasicTemplate.Editors
 {
     public class SkddkkkkDebugRedirect : AssetPostprocessor
     {

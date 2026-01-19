@@ -2,7 +2,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Editor
+namespace Skddkkkk.DevelopKit.BasicTemplate.Editors
 {
     [InitializeOnLoad]
     public class Extender : Editor
@@ -10,7 +10,7 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Editor
         private const string UNITASK_NAME = "com.cysharp.unitask";
         private const string UNITASK_URL = "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask";
         
-        static BasicTemplateToolbarExtender()
+        static Extender()
         {
             bool checkUnitaskInstalled = CheckPackageInstalled(UNITASK_NAME);
             if (!checkUnitaskInstalled)
