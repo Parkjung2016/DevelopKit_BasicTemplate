@@ -1,0 +1,74 @@
+using System;
+using Skddkkkk.DevelopKit.BasicTemplate.Runtime;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+#if UNITASK_INSTALLED
+using Cysharp.Threading.Tasks;
+#endif
+
+namespace Skddkkkk.Developkit.BasicTemplate.Runtime
+{
+    public class SceneLoadManager : PersistentMonoSingleton<SceneLoadManager>
+    {
+        public BaseScene CurScene { get; private set; }
+        [SerializeReference] private ISceneTransition transition;
+
+        public void RegisterScene(BaseScene scene)
+        {
+            CurScene = scene;
+        }
+
+        public void SetTransition(ISceneTransition transition)
+        {
+            if (this.transition != null)
+            {
+                Destroy(transition.GO);
+            }
+
+            this.transition = transition;
+        }
+
+
+        public async UniTask LoadScene(Enum sceneType, LoadSceneMode loadMode = LoadSceneMode.Single)
+        {
+            if (transition != null)
+                await transition.OnFadeIn();
+
+            await LoadSceneAsync(sceneType.ToString(), loadMode);
+            await InitializeScene();
+
+            if (transition != null)
+                await transition.OnFadeOut();
+
+            CurScene.OnAfterInit();
+        }
+
+
+        private async UniTask LoadSceneAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single)
+        {
+            var op = SceneManager.LoadSceneAsync(sceneName, loadMode);
+            op.allowSceneActivation = false;
+
+            var progress = transition as IProgress<float>;
+            while (op.progress < 0.9f)
+            {
+                progress?.Report(op.progress / 0.9f);
+
+                await UniTask.Yield();
+            }
+
+            progress?.Report(1f);
+            op.allowSceneActivation = true;
+
+            await UniTask.WaitUntil(() => op.isDone);
+        }
+
+        private async UniTask InitializeScene()
+        {
+#if UNITASK_INSTALLED
+            await CurScene.OnInit();
+#endif
+        }
+    }
+}
