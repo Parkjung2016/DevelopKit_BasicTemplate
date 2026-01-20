@@ -12,14 +12,15 @@ namespace Skddkkkk.Developkit.BasicTemplate.Runtime
     public class SceneLoadManager : PersistentMonoSingleton<SceneLoadManager>
     {
         public BaseScene CurScene { get; private set; }
-        [SerializeReference] private ISceneTransition transition;
+
+        [SerializeField] private SceneTransitionBase transition;
 
         public void RegisterScene(BaseScene scene)
         {
             CurScene = scene;
         }
 
-        public void SetTransition(ISceneTransition transition)
+        public void SetTransition(SceneTransitionBase transition)
         {
             if (this.transition != null)
             {

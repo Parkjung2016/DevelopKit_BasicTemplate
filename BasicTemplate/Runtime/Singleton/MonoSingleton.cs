@@ -33,7 +33,7 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
             InitializeSingleton();
         }
 
-        protected virtual void InitializeSingleton()
+        protected void InitializeSingleton()
         {
             if (!Application.isPlaying) return;
 

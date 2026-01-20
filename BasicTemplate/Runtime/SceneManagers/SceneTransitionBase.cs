@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Skddkkkk.Developkit.BasicTemplate.Runtime
 {
-    public abstract class SceneTransitionBase : MonoBehaviour, ISceneTransition
+    public abstract class SceneTransitionBase : MonoBehaviour
     {
         public GameObject GO => gameObject;
         protected virtual void Awake()
