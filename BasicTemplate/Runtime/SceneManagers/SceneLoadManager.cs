@@ -66,6 +66,12 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
 
         private async UniTask InitializeScene()
         {
+			if(CurScene== null)
+            {
+                SkddkkkkDebug.LogError("Current Scene is null. Make sure the scene has a BaseScene derived object.");
+                return;
+            }
+			
 #if UNITASK_INSTALLED
             await CurScene.OnInit();
 #endif
