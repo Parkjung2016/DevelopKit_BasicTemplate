@@ -3,9 +3,8 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.LowLevel;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
-{
- public static class PlayerLoopUtils {
+namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime {
+    public static class PlayerLoopUtils {
         // Remove a system from the player loop
         public static void RemoveSystem<T>(ref PlayerLoopSystem loop, in PlayerLoopSystem systemToRemove) {
             if (loop.subSystemList == null) return;

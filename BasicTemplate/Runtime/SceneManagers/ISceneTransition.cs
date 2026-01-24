@@ -3,11 +3,11 @@ using UnityEngine;
 using Cysharp.Threading.Tasks;
 #endif
 
-namespace Skddkkkk.Developkit.BasicTemplate.Runtime
+namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
 {
     public interface ISceneTransition
     {
-        public GameObject GO { get; }
+        public GameObject Go { get; }
 #if UNITASK_INSTALLED
         UniTask OnFadeOut();
         UniTask OnFadeIn();

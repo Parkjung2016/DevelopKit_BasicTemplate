@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Skddkkkk.Developkit.BasicTemplate.Runtime {
+namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime {
     public abstract class Timer : IDisposable {
         public float CurrentTime { get; protected set; }
         public bool IsRunning { get; private set; }

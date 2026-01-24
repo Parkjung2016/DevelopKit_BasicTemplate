@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Skddkkkk.Developkit.BasicTemplate.Runtime {
+namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime {
     /// <summary>
     /// Timer that counts up from zero to infinity.  Great for measuring durations.
     /// </summary>

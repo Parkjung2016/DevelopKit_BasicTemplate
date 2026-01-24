@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Skddkkkk.Developkit.BasicTemplate.Runtime {
+namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime {
     /// <summary>
     /// Timer that ticks at a specific frequency. (N times per second)
     /// </summary>

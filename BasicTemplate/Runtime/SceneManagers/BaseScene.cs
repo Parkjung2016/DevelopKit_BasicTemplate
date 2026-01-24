@@ -1,9 +1,8 @@
 #if UNITASK_INSTALLED
 using Cysharp.Threading.Tasks;
 #endif
-using Skddkkkk.DevelopKit.BasicTemplate.Runtime;
 
-namespace Skddkkkk.Developkit.BasicTemplate.Runtime
+namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
 {
     public class BaseScene : MonoSingleton<BaseScene>
     {

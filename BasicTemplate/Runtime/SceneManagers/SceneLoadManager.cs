@@ -1,5 +1,4 @@
 using System;
-using Skddkkkk.DevelopKit.BasicTemplate.Runtime;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -7,7 +6,7 @@ using UnityEngine.SceneManagement;
 using Cysharp.Threading.Tasks;
 #endif
 
-namespace Skddkkkk.Developkit.BasicTemplate.Runtime
+namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
 {
     public class SceneLoadManager : PersistentMonoSingleton<SceneLoadManager>
     {
@@ -24,7 +23,7 @@ namespace Skddkkkk.Developkit.BasicTemplate.Runtime
         {
             if (this.transition != null)
             {
-                Destroy(transition.GO);
+                Destroy(transition.Go);
             }
 
             this.transition = transition;

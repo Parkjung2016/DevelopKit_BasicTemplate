@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.LowLevel;
 using UnityEngine.PlayerLoop;
 
-namespace Skddkkkk.Developkit.BasicTemplate.Runtime {
+namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime {
     internal static class TimerBootstrapper {
         static PlayerLoopSystem timerSystem;
         

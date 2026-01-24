@@ -3,11 +3,11 @@ using Cysharp.Threading.Tasks;
 #endif
 using UnityEngine;
 
-namespace Skddkkkk.Developkit.BasicTemplate.Runtime
+namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
 {
     public abstract class SceneTransitionBase : MonoBehaviour
     {
-        public GameObject GO => gameObject;
+        public GameObject Go => gameObject;
         protected virtual void Awake()
         {
             SceneLoadManager.Instance.SetTransition(this);

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Skddkkkk.Developkit.BasicTemplate.Runtime {
+namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime {
     /// <summary>
     /// Countdown timer that fires an event every interval until completion.
     /// </summary>

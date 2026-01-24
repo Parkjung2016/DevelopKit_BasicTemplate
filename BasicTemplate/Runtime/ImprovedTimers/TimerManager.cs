@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Skddkkkk.DevelopKit.BasicTemplate.Runtime;
 
-namespace Skddkkkk.Developkit.BasicTemplate.Runtime
+namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
 {
     public static class TimerManager
     {
