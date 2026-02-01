@@ -14,7 +14,6 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
             componentManager.AfterInitialize();
             AfterComponentsInitialize();
         }
-
         protected virtual void BeforeComponentsInitialize()
         {
         }
@@ -23,6 +22,10 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
         {
         }
 
+        protected virtual void Update()
+        {
+            componentManager.OnUpdate();
+        }
         public T1 GetCompo<T1>(bool isDerived = false) where T1 : IObjectComponentBase
         {
             return componentManager.GetCompo<T1>(isDerived);

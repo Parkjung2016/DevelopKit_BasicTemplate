@@ -8,6 +8,8 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
     public class ComponentManager
     {
         private readonly Dictionary<Type, IObjectComponentBase> componentDic = new();
+        private readonly List<IAfterInitable> afterInitableList = new();
+        private readonly List<IUpdatable> updatableList = new();
 
         public void AddComponentToDictionary(MonoBehaviour owner)
         {
@@ -24,6 +26,12 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
             {
                 var compType = component.GetType();
                 componentDic[compType] = component;
+
+                if (component is IAfterInitable afterInitable)
+                    afterInitableList.Add(afterInitable);
+                
+                if (component is IUpdatable updatable)
+                    updatableList.Add(updatable);
             }
         }
 
@@ -38,7 +46,14 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
 
         public void AfterInitialize()
         {
-            componentDic.Values.OfType<IAfterInitable>().ForEach(afterInitable => { afterInitable.AfterInitialize(); });
+            for (int i = 0; i < afterInitableList.Count; i++)
+                afterInitableList[i].AfterInitialize();
+        }
+
+        public void OnUpdate()
+        {
+            for (int i = 0; i < updatableList.Count; i++)
+                updatableList[i].OnUpdate();
         }
 
         public T GetCompo<T>(bool isDerived = false) where T : IObjectComponentBase

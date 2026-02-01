@@ -10,6 +10,14 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
         public void AfterInitialize();
     }
 
+    /// <summary>
+    /// 매 프레임 호출되는 메서드를 정의하는 인터페이스입니다.
+    /// </summary>
+    public interface IUpdatable
+    {
+        public void OnUpdate();
+    }
+
     public interface IObjectComponentBase
     {
     }
