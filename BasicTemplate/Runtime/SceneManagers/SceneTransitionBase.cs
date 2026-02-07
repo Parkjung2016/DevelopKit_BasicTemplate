@@ -7,7 +7,6 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
 {
     public abstract class SceneTransitionBase : MonoBehaviour
     {
-        public GameObject Go => gameObject;
         protected virtual void Awake()
         {
             SceneLoadManager.Instance.SetTransition(this);

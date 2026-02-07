@@ -2,7 +2,7 @@
 
 namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
 {
-    public static class CursorManager
+    public class CursorManager : Singleton<CursorManager>
     {
         /// <summary>
         /// 마우스 커서의 잠금 모드를 설정합니다.
@@ -12,7 +12,7 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
         /// CursorLockMode가 Locked일 경우 커서를 화면 중앙에 고정하고 보이지 않게 설정합니다.
         /// Locked가 아니면 커서를 보이도록 설정합니다.
         /// </remarks>
-        public static void SetCursorLockMode(CursorLockMode lockMode)
+        public void SetCursorLockMode(CursorLockMode lockMode)
         {
             Cursor.lockState = lockMode;
 

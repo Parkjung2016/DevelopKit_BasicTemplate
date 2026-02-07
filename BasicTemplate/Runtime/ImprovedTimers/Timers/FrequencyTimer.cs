@@ -3,8 +3,9 @@ using UnityEngine;
 
 namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime {
     /// <summary>
-    /// Timer that ticks at a specific frequency. (N times per second)
+    /// 초당 N번 실행되도록 설정된 타이머.
     /// </summary>
+
     public class FrequencyTimer : Timer {
         public int TicksPerSecond { get; private set; }
         

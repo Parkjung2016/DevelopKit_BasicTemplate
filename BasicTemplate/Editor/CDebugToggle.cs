@@ -7,14 +7,14 @@ using UnityEngine;
 namespace Skddkkkk.DevelopKit.BasicTemplate.Editors
 {
     [InitializeOnLoad]
-    public static class SkddkkkkDebugToggle
+    public static class CDebugToggle
     {
         private const string SYMBOL = "ENABLE_LOG";
         private const string MENU_PATH = "Skddkkkk/Toggle Debug Logs";
 
         private static bool prevToggle;
 
-        static SkddkkkkDebugToggle()
+        static CDebugToggle()
         {
             BuildPlayerWindow.RegisterBuildPlayerHandler(OnBuildPlayer);
             UpdateMenuCheck(); // 에디터 로드 시 체크 상태 갱신
@@ -25,7 +25,7 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Editors
             prevToggle = IsSymbolEnabled();
             bool enableLogs = EditorUtility.DisplayDialog(
                 "Enable Debug Logs",
-                "빌드에서 SkddkkkkDebug를 활성화하시겠습니까?",
+                "빌드에서 Skddkkkk.CDebug를 활성화하시겠습니까?",
                 "Yes",
                 "No"
             );
@@ -49,7 +49,7 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Editors
         {
             bool isEnabled = IsSymbolEnabled();
             SetSymbolEnabled(!isEnabled);
-            Debug.Log($"SkddkkkkDebug: Logs {(isEnabled ? "disabled" : "enabled")}");
+            Debug.Log($"CDebug: Logs {(isEnabled ? "disabled" : "enabled")}");
             AssetDatabase.Refresh();
         }
 

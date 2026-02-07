@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime {
     /// <summary>
-    /// Countdown timer that fires an event every interval until completion.
+    /// 완료될 때까지 일정 간격마다 이벤트를 발생시키는 카운트다운 타이머.
     /// </summary>
     public class IntervalTimer : Timer {
         readonly float interval;

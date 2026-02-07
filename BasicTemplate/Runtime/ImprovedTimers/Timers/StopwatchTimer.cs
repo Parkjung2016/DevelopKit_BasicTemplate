@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime {
     /// <summary>
-    /// Timer that counts up from zero to infinity.  Great for measuring durations.
+    /// 경과 시간 측정을 위한 증가형 타이머.
     /// </summary>
     public class StopwatchTimer : Timer {
         public StopwatchTimer() : base(0) { }

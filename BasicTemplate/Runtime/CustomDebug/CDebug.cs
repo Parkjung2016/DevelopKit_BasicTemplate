@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
 {
-    public static class SkddkkkkDebug
+    public static class CDebug
     {
         #region 화면 로그용 내부 MonoBehaviour
 

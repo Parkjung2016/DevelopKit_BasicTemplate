@@ -10,20 +10,30 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
 {
     public class SceneLoadManager : PersistentMonoSingleton<SceneLoadManager>
     {
-        public BaseScene CurScene { get; private set; }
-
         [SerializeField] private SceneTransitionBase transition;
+
+        private BaseScene curScene;
 
         public void RegisterScene(BaseScene scene)
         {
-            CurScene = scene;
+            curScene = scene;
+        }
+
+        public T GetCurScene<T>() where T : BaseScene
+        {
+            return GetCurScene() as T;
+        }
+
+        public BaseScene GetCurScene()
+        {
+            return curScene;
         }
 
         public void SetTransition(SceneTransitionBase transition)
         {
             if (this.transition != null)
             {
-                Destroy(transition.Go);
+                Destroy(transition.gameObject);
             }
 
             this.transition = transition;
@@ -41,7 +51,7 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
             if (transition != null)
                 await transition.OnFadeOut();
 
-            CurScene.OnAfterInit();
+            curScene.OnAfterInit();
         }
 
 
@@ -66,14 +76,14 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
 
         private async UniTask InitializeScene()
         {
-			if(CurScene== null)
+            if (curScene == null)
             {
-                SkddkkkkDebug.LogError("Current Scene is null. Make sure the scene has a BaseScene derived object.");
+                CDebug.LogError("Current Scene is null. Make sure the scene has a BaseScene derived object.");
                 return;
             }
-			
+
 #if UNITASK_INSTALLED
-            await CurScene.OnInit();
+            await curScene.OnInit();
 #endif
         }
     }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime {
     /// <summary>
-    /// Timer that counts down from a specific value to zero.
+    /// 특정 값에서 0까지 카운트다운하는 타이머.
     /// </summary>
     public class CountdownTimer : Timer {
         public CountdownTimer(float value) : base(value) { }

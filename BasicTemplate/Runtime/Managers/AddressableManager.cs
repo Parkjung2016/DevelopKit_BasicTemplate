@@ -24,25 +24,25 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
         }
     }
 
-    public static class AddressableManager
+    public class AddressableManager : Singleton<AddressableManager>
     {
         public delegate void OnResourceLoaded(string key, int loadedCount, int totalCount);
 
-        private static readonly Dictionary<string, LoadedResource> _resourcesByName =
+        private readonly Dictionary<string, LoadedResource> _resourcesByName =
             new Dictionary<string, LoadedResource>();
 
-        public static bool showDebugLog = true;
-        public static bool isLoaded;
+        public bool IsDebugging = true;
+        public bool IsLoaded;
 
         #region load reousources
 
-        public static T Load<T>(string key) where T : Object
+        public T Load<T>(string key) where T : Object
         {
             if (_resourcesByName.TryGetValue(key, out LoadedResource loadedResource))
             {
                 var result = loadedResource.asset as T;
-                if (showDebugLog)
-                    SkddkkkkDebug.Log(result);
+                if (IsDebugging)
+                    CDebug.Log(result);
                 if (result == null)
                     if (loadedResource.asset is GameObject go)
                     {
@@ -55,14 +55,14 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
             return null;
         }
 
-        public static T Instantiate<T>(string key, Transform parent = null) where T : Component
+        public T Instantiate<T>(string key, Transform parent = null) where T : Component
         {
             GameObject prefab = Load<GameObject>(key);
 
             if (!prefab)
             {
-                if (showDebugLog)
-                    SkddkkkkDebug.LogError($"Failed to load prefab : {key}");
+                if (IsDebugging)
+                    CDebug.LogError($"Failed to load prefab : {key}");
                 return null;
             }
 
@@ -72,14 +72,14 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
             return go;
         }
 
-        public static GameObject Instantiate(string key, Transform parent = null)
+        public GameObject Instantiate(string key, Transform parent = null)
         {
             GameObject prefab = Load<GameObject>(key);
 
             if (!prefab)
             {
-                if (showDebugLog)
-                    SkddkkkkDebug.LogError($"Failed to load prefab : {key}");
+                if (IsDebugging)
+                    CDebug.LogError($"Failed to load prefab : {key}");
                 return null;
             }
 
@@ -89,12 +89,12 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
         }
 
         #endregion
-        
+
 #if UNITASK_INSTALLED
 
         #region addressable
 
-        private static async UniTask<T> LoadAsync<T>(string key) where T : Object
+        private async UniTask<T> LoadAsync<T>(string key) where T : Object
         {
             LoadedResource loadedResource;
             if (_resourcesByName.TryGetValue(key, out loadedResource))
@@ -115,7 +115,8 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
             return result;
         }
 
-        public static async UniTask LoadALlAsync<T>(string label, OnResourceLoaded callBack = null, Action OnResourceAllLoaded=null)
+        public async UniTask LoadALlAsync<T>(string label, OnResourceLoaded callBack = null,
+            Action OnResourceAllLoaded = null)
             where T : Object
         {
             float timeoutSeconds = 5f;
@@ -125,7 +126,7 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
             }
             catch (TimeoutException)
             {
-                SkddkkkkDebug.LogError($"DownloadDependenciesAsync timeout ({{timeoutSeconds}}s for label: {label}");
+                CDebug.LogError($"DownloadDependenciesAsync timeout ({{timeoutSeconds}}s for label: {label}");
             }
 
             var opHandle = Addressables.LoadResourceLocationsAsync(label, typeof(T));
@@ -151,11 +152,11 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
                 }
             }
 
-            isLoaded = true;
+            IsLoaded = true;
             OnResourceAllLoaded?.Invoke();
         }
 
-        public static async UniTask<bool> DownloadDependenciesAsync(object label)
+        public async UniTask<bool> DownloadDependenciesAsync(object label)
         {
             var getDownloadHandle = Addressables.GetDownloadSizeAsync(label);
             await getDownloadHandle.Task;
@@ -174,19 +175,20 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
 
         #region scene
 
-        public static async UniTask<SceneInstance> LoadSceneAsync(string key,
+        public async UniTask<SceneInstance> LoadSceneAsync(string key,
             LoadSceneMode sceneMode = LoadSceneMode.Single)
         {
             return await Addressables.LoadSceneAsync(key, sceneMode);
         }
 
-        public static async UniTask<SceneInstance> UnloadSceneAsync(
+        public async UniTask<SceneInstance> UnloadSceneAsync(
             AsyncOperationHandle<SceneInstance> sceneInstanceHandle)
         {
             return await Addressables.UnloadSceneAsync(sceneInstanceHandle);
         }
 
         #endregion
-        #endif
+
+#endif
     }
 }
