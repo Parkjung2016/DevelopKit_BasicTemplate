@@ -6,7 +6,7 @@
   "unityRelease": "1f1",
   "description": "Provides utilities and systems such as Custom Debug, Singleton, and Addressable Manager.",
   "author": {
-    "name": "Parkjung2016",
+    "name": "PJdev",
     "email": "bagj21563@gmail.com"
   },
   "dependencies": {
