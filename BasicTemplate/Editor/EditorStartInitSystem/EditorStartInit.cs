@@ -40,12 +40,12 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
                 var pathOfFirstScene = EditorBuildSettings.scenes[0].path;
                 var sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(pathOfFirstScene);
                 EditorSceneManager.playModeStartScene = sceneAsset;
-                Debug.Log($"??Setup ?ъ뿉???쒖옉: {pathOfFirstScene}");
+                Debug.Log($"▶ Setup 씬에서 시작: {pathOfFirstScene}");
             }
             else
             {
                 EditorSceneManager.playModeStartScene = null;
-                Debug.Log("???꾩옱 ?ъ뿉???쒖옉");
+                Debug.Log("▶ 현재 씬에서 시작");
             }
         }
     }
