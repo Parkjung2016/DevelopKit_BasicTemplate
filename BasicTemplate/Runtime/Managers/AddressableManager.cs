@@ -10,7 +10,7 @@ using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
+namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     public struct LoadedResource
     {
@@ -34,20 +34,21 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
         public bool IsDebugging = true;
         public bool IsLoaded;
 
-        #region load reousources
+        #region load resources
 
         public T Load<T>(string key) where T : Object
         {
             if (_resourcesByName.TryGetValue(key, out LoadedResource loadedResource))
             {
                 var result = loadedResource.asset as T;
+
                 if (IsDebugging)
                     CDebug.Log(result);
-                if (result == null)
-                    if (loadedResource.asset is GameObject go)
-                    {
-                        return go.GetComponent<T>();
-                    }
+
+                if (result == null && loadedResource.asset is GameObject go)
+                {
+                    return go.GetComponent<T>();
+                }
 
                 return result;
             }
@@ -67,9 +68,9 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
             }
 
             var prefabInstantiate = Object.Instantiate(prefab, parent);
-            T go = prefabInstantiate.GetOrAdd<T>();
-            go.gameObject.name = prefab.name;
-            return go;
+            T comp = prefabInstantiate.GetOrAdd<T>();
+            comp.gameObject.name = prefab.name;
+            return comp;
         }
 
         public GameObject Instantiate(string key, Transform parent = null)
@@ -96,60 +97,84 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
 
         private async UniTask<T> LoadAsync<T>(string key) where T : Object
         {
-            LoadedResource loadedResource;
-            if (_resourcesByName.TryGetValue(key, out loadedResource))
+            if (_resourcesByName.TryGetValue(key, out LoadedResource loadedResource))
             {
                 return loadedResource.asset as T;
             }
 
             string loadKey = key;
+
             if (key.Contains(".sprite"))
                 loadKey = $"{key}[{key.Replace(".sprite", "")}]";
 
             var asyncOperation = Addressables.LoadAssetAsync<T>(loadKey);
             await asyncOperation;
 
+            if (asyncOperation.Status != AsyncOperationStatus.Succeeded)
+            {
+                if (IsDebugging)
+                    CDebug.LogError($"Failed to load asset: {key}");
+                return null;
+            }
+
             T result = asyncOperation.Result;
+
             loadedResource = new LoadedResource(result, asyncOperation);
             _resourcesByName.TryAdd(key, loadedResource);
+
             return result;
         }
 
-        public async UniTask LoadALlAsync<T>(string label, OnResourceLoaded callBack = null,
+        public async UniTask LoadALlAsync<T>(string label,
+            OnResourceLoaded callBack = null,
             Action OnResourceAllLoaded = null)
             where T : Object
         {
-            float timeoutSeconds = 5f;
+            if (string.IsNullOrEmpty(label))
+            {
+                if (IsDebugging)
+                    CDebug.LogWarning("Label is null or empty");
+                return;
+            }
+
             try
             {
-                await DownloadDependenciesAsync(label).Timeout(TimeSpan.FromSeconds(timeoutSeconds));
+                await DownloadDependenciesAsync(label);
             }
-            catch (TimeoutException)
+            catch (Exception e)
             {
-                CDebug.LogError($"DownloadDependenciesAsync timeout ({{timeoutSeconds}}s for label: {label}");
+                if (IsDebugging)
+                    CDebug.LogError($"DownloadDependencies failed: {e.Message}");
             }
 
             var opHandle = Addressables.LoadResourceLocationsAsync(label, typeof(T));
             await opHandle;
+
+            if (opHandle.Status != AsyncOperationStatus.Succeeded ||
+                opHandle.Result == null ||
+                opHandle.Result.Count == 0)
+            {
+                if (IsDebugging)
+                    CDebug.LogWarning($"No resources found for label: {label}");
+
+                OnResourceAllLoaded?.Invoke();
+                return;
+            }
 
             int loadCount = 0;
             int totalCount = opHandle.Result.Count;
 
             foreach (var result in opHandle.Result)
             {
-                bool isContainsDotSprite = result.PrimaryKey.Contains(".sprite");
-                if (isContainsDotSprite)
-                {
+                bool isSprite = result.PrimaryKey.Contains(".sprite");
+
+                if (isSprite)
                     await LoadAsync<Sprite>(result.PrimaryKey);
-                    loadCount++;
-                    callBack?.Invoke(result.PrimaryKey, loadCount, totalCount);
-                }
                 else
-                {
                     await LoadAsync<T>(result.PrimaryKey);
-                    loadCount++;
-                    callBack?.Invoke(result.PrimaryKey, loadCount, totalCount);
-                }
+
+                loadCount++;
+                callBack?.Invoke(result.PrimaryKey, loadCount, totalCount);
             }
 
             IsLoaded = true;
@@ -158,12 +183,20 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
 
         public async UniTask<bool> DownloadDependenciesAsync(object label)
         {
-            var getDownloadHandle = Addressables.GetDownloadSizeAsync(label);
-            await getDownloadHandle.Task;
-            if (getDownloadHandle.Status == AsyncOperationStatus.Succeeded && getDownloadHandle.Result > 0)
+            if (label == null)
+                return false;
+
+            var sizeHandle = Addressables.GetDownloadSizeAsync(label);
+            await sizeHandle.Task;
+
+            if (sizeHandle.Status != AsyncOperationStatus.Succeeded)
+                return false;
+
+            if (sizeHandle.Result > 0)
             {
                 var downloadHandle = Addressables.DownloadDependenciesAsync(label, true);
                 await downloadHandle.Task;
+
                 if (downloadHandle.Status != AsyncOperationStatus.Succeeded)
                     return false;
             }

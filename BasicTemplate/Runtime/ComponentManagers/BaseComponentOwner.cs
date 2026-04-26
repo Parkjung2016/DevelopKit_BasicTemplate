@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
+namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     public abstract class BaseComponentOwner<T> : MonoBehaviour where T : BaseComponentOwner<T>
     {

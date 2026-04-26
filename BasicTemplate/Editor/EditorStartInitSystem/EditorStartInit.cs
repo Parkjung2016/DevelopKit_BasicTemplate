@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Editors
+namespace PJDev.DevelopKit.BasicTemplate.Editors
 {
     [InitializeOnLoad]
     public class EditorStartInit
@@ -40,12 +40,12 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Editors
                 var pathOfFirstScene = EditorBuildSettings.scenes[0].path;
                 var sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(pathOfFirstScene);
                 EditorSceneManager.playModeStartScene = sceneAsset;
-                Debug.Log($"▶ Setup 씬에서 시작: {pathOfFirstScene}");
+                Debug.Log($"??Setup ?ъ뿉???쒖옉: {pathOfFirstScene}");
             }
             else
             {
                 EditorSceneManager.playModeStartScene = null;
-                Debug.Log("▶ 현재 씬에서 시작");
+                Debug.Log("???꾩옱 ?ъ뿉???쒖옉");
             }
         }
     }

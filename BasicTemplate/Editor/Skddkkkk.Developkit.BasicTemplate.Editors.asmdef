@@ -1,10 +1,10 @@
 {
-    "name": "Skddkkkk.Developkit.BasicTemplate.Editors",
-    "rootNamespace": "Skddkkkk.Developkit.BasicTemplate.Editors",
+    "name": "PJDev.Developkit.BasicTemplate.Editors",
+    "rootNamespace": "PJDev.Developkit.BasicTemplate.Editors",
     "references": [
         "Unity.Addressables.Editor",
-        "Skddkkkk.Developkit.BasicTemplate.Runtime",
-        "Skddkkkk.Developkit.Editors"
+        "PJDev.Developkit.BasicTemplate.Runtime",
+        "PJDev.Developkit.Editors"
     ],
     "includePlatforms": [
         "Editor"

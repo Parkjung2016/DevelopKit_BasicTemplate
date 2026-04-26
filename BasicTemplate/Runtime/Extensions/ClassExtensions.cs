@@ -1,8 +1,8 @@
-﻿using System.IO;
+using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
+namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     public static class ClassExtensions
     {

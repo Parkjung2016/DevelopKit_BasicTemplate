@@ -1,7 +1,7 @@
-﻿using System.Linq;
+using System.Linq;
 using UnityEngine;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
+namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     public static class GameObjectExtensions
     {

@@ -1,9 +1,9 @@
 using System;
 using UnityEngine;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime {
+namespace PJDev.DevelopKit.BasicTemplate.Runtime {
     /// <summary>
-    /// ÃÊ´ç N¹ø ½ÇÇàµÇµµ·Ï ¼³Á¤µÈ Å¸ÀÌ¸Ó.
+    /// ì´ˆë‹¹ Në²ˆ ì‹¤í–‰ë˜ë„ë¡ ì„¤ì •ëœ íƒ€ì´ë¨¸.
     /// </summary>
 
     public class FrequencyTimer : Timer {

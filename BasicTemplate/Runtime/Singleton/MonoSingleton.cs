@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
+namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     /// <summary>
     /// 기본적인 싱글톤 - 씬 전환 시 파괴됩니다.

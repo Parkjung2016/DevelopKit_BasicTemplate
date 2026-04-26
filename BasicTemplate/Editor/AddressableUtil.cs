@@ -1,10 +1,10 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using System.Collections.Generic;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Editors
+namespace PJDev.DevelopKit.BasicTemplate.Editors
 {
     public static class AddressableUtil
     {

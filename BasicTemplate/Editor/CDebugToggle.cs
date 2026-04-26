@@ -1,16 +1,16 @@
-﻿using UnityEditor;
+using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEditor.Build;
 using System.Linq;
 using UnityEngine;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Editors
+namespace PJDev.DevelopKit.BasicTemplate.Editors
 {
     [InitializeOnLoad]
     public static class CDebugToggle
     {
         private const string SYMBOL = "ENABLE_LOG";
-        private const string MENU_PATH = "Skddkkkk/Toggle Debug Logs";
+        private const string MENU_PATH = "PJDev/Toggle Debug Logs";
 
         private static bool prevToggle;
 
@@ -25,7 +25,7 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Editors
             prevToggle = IsSymbolEnabled();
             bool enableLogs = EditorUtility.DisplayDialog(
                 "Enable Debug Logs",
-                "빌드에서 Skddkkkk.CDebug를 활성화하시겠습니까?",
+                "빌드에서 PJDev.CDebug를 활성화하시겠습니까?",
                 "Yes",
                 "No"
             );

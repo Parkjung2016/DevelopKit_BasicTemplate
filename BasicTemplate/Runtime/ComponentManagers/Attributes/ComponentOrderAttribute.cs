@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
+namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public sealed class ComponentOrderAttribute : Attribute

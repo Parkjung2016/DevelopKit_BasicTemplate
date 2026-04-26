@@ -1,4 +1,4 @@
-﻿namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
+namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     public class Singleton<T> where T : class, new()
     {

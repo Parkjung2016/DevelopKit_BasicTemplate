@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
+namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     public static class CDebug
     {
@@ -28,7 +28,7 @@ namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
                 {
                     if (instance == null)
                     {
-                        var go = new GameObject("SkddkkkkFloatingDebug");
+                        var go = new GameObject("PJDevFloatingDebug");
                         instance = go.AddComponent<FloatingDebug>();
                         UnityEngine.Object.DontDestroyOnLoad(go);
                     }

@@ -1,9 +1,9 @@
 using System;
 using UnityEngine;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime {
+namespace PJDev.DevelopKit.BasicTemplate.Runtime {
     /// <summary>
-    /// ¿Ï·áµÉ ¶§±îÁö ÀÏÁ¤ °£°İ¸¶´Ù ÀÌº¥Æ®¸¦ ¹ß»ı½ÃÅ°´Â Ä«¿îÆ®´Ù¿î Å¸ÀÌ¸Ó.
+    /// ì™„ë£Œë  ë•Œê¹Œì§€ ì¼ì • ê°„ê²©ë§ˆë‹¤ ì´ë²¤íŠ¸ë¥¼ ë°œìƒì‹œí‚¤ëŠ” ì¹´ìš´íŠ¸ë‹¤ìš´ íƒ€ì´ë¨¸.
     /// </summary>
     public class IntervalTimer : Timer {
         readonly float interval;

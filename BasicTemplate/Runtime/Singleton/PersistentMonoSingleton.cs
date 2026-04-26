@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
+namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     /// <summary>
     /// Unity 씬이 바뀌어도 파괴되지 않고 유지되는 싱글톤-	먼저 생긴 인스턴스만 유지합니다.

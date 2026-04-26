@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime {
+namespace PJDev.DevelopKit.BasicTemplate.Runtime {
     /// <summary>
-    /// °æ°ú ½Ã°£ ÃøÁ¤À» À§ÇÑ Áõ°¡Çü Å¸ÀÌ¸Ó.
+    /// ê²½ê³¼ ì‹œê°„ ì¸¡ì •ì„ ìœ„í•œ ì¦ê°€í˜• íƒ€ì´ë¨¸.
     /// </summary>
     public class StopwatchTimer : Timer {
         public StopwatchTimer() : base(0) { }

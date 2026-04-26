@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 #endif
 using UnityEngine;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
+namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     public abstract class SceneTransitionBase : MonoBehaviour
     {

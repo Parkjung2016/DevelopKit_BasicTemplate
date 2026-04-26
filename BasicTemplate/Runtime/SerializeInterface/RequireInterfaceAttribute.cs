@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
+namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     [AttributeUsage(AttributeTargets.Field)]
     public class RequireInterfaceAttribute : PropertyAttribute

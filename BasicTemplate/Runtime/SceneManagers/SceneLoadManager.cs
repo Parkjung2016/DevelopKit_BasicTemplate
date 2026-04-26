@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 using Cysharp.Threading.Tasks;
 #endif
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
+namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     public class SceneLoadManager : PersistentMonoSingleton<SceneLoadManager>
     {

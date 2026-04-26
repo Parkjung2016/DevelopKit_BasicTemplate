@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime {
+namespace PJDev.DevelopKit.BasicTemplate.Runtime {
     /// <summary>
-    /// Æ¯Á¤ °ª¿¡¼­ 0±îÁö Ä«¿îÆ®´Ù¿îÇÏ´Â Å¸ÀÌ¸Ó.
+    /// íŠ¹ì • ê°’ì—ì„œ 0ê¹Œì§€ ì¹´ìš´íŠ¸ë‹¤ìš´í•˜ëŠ” íƒ€ì´ë¨¸.
     /// </summary>
     public class CountdownTimer : Timer {
         public CountdownTimer(float value) : base(value) { }

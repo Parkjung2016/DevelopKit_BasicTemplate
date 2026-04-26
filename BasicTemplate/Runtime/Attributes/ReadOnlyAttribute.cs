@@ -4,7 +4,7 @@ using System;
 using UnityEditor;
 #endif
 
-namespace Skddkkkk.DevelopKit.BasicTemplate.Runtime
+namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
 #if UNITY_EDITOR
     [CustomPropertyDrawer(typeof(ReadOnlyAttribute), true)]
