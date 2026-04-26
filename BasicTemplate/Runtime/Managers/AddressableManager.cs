@@ -186,22 +186,43 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             if (label == null)
                 return false;
 
-            var sizeHandle = Addressables.GetDownloadSizeAsync(label);
-            await sizeHandle.Task;
-
-            if (sizeHandle.Status != AsyncOperationStatus.Succeeded)
-                return false;
-
-            if (sizeHandle.Result > 0)
+            try
             {
-                var downloadHandle = Addressables.DownloadDependenciesAsync(label, true);
-                await downloadHandle.Task;
+                var locationsHandle = Addressables.LoadResourceLocationsAsync(label);
+                await locationsHandle.Task;
 
-                if (downloadHandle.Status != AsyncOperationStatus.Succeeded)
+                if (locationsHandle.Status != AsyncOperationStatus.Succeeded ||
+                    locationsHandle.Result == null ||
+                    locationsHandle.Result.Count == 0)
+                {
+                    if (IsDebugging)
+                        CDebug.LogWarning($"No addressable locations found for label: {label}");
                     return false;
-            }
+                }
 
-            return true;
+                var sizeHandle = Addressables.GetDownloadSizeAsync(label);
+                await sizeHandle.Task;
+
+                if (sizeHandle.Status != AsyncOperationStatus.Succeeded)
+                    return false;
+
+                if (sizeHandle.Result > 0)
+                {
+                    var downloadHandle = Addressables.DownloadDependenciesAsync(label, true);
+                    await downloadHandle.Task;
+
+                    if (downloadHandle.Status != AsyncOperationStatus.Succeeded)
+                        return false;
+                }
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                if (IsDebugging)
+                    CDebug.LogWarning($"Skipping dependency download for invalid label '{label}': {e.Message}");
+                return false;
+            }
         }
 
         #endregion
