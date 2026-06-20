@@ -30,7 +30,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
                 return instance;
             }
         }
-        
+
         protected virtual void Awake()
         {
             InitializeSingleton();
@@ -41,8 +41,11 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             if (!Application.isPlaying) return;
             InitializationTime = Time.time;
             DontDestroyOnLoad(gameObject);
-
+#if UNITY_6000_4_OR_NEWER
+            T[] oldInstances = FindObjectsByType<T>();
+#else
             T[] oldInstances = FindObjectsByType<T>(FindObjectsSortMode.None);
+#endif
             foreach (T old in oldInstances)
             {
                 if (old.GetComponent<RegulatorMonoSingleton<T>>().InitializationTime < InitializationTime)
