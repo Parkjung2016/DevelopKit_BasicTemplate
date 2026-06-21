@@ -8,7 +8,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
 {
     public static class AddressableUtil
     {
-        [MenuItem("Tools/Addressable/Rename Sprites")]
+        [MenuItem("PJDev/Addressable/Rename Sprites")]
         public static void RenameSprites()
         {
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
