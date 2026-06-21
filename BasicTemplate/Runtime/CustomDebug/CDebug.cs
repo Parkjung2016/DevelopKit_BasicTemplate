@@ -81,11 +81,14 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
         [Conditional("ENABLE_LOG")]
         public static void Log(object message, UnityEngine.Object context = null, int? prefixNumber = null,
-            bool showTimestamp = false, bool showOnScreen = false, float duration = 2f,
+            bool showTimestamp = false, bool showOnScreen = false, float duration = 2f, CDebugTag tag = CDebugTag.Default,
             [CallerFilePath] string callerFilePath = "",
             [CallerMemberName] string callerMember = "")
         {
-            string msg = BuildMessage(message, prefixNumber, showTimestamp, callerFilePath, callerMember);
+            if (!TryBuildMessage(message, tag, prefixNumber, showTimestamp, callerFilePath, callerMember,
+                    out string msg))
+                return;
+
             if (showOnScreen)
                 FloatingDebug.Instance.AddMessage(msg, null, duration);
             else
@@ -94,11 +97,14 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
         [Conditional("ENABLE_LOG")]
         public static void LogWarning(object message, UnityEngine.Object context = null, int? prefixNumber = null,
-            bool showTimestamp = false, bool showOnScreen = false, float duration = 2f,
+            bool showTimestamp = false, bool showOnScreen = false, float duration = 2f, CDebugTag tag = CDebugTag.Default,
             [CallerFilePath] string callerFilePath = "",
             [CallerMemberName] string callerMember = "")
         {
-            string msg = BuildMessage(message, prefixNumber, showTimestamp, callerFilePath, callerMember);
+            if (!TryBuildMessage(message, tag, prefixNumber, showTimestamp, callerFilePath, callerMember,
+                    out string msg))
+                return;
+
             if (showOnScreen)
                 FloatingDebug.Instance.AddMessage(msg, Color.yellow, duration);
             else
@@ -107,11 +113,14 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
         [Conditional("ENABLE_LOG")]
         public static void LogError(object message, UnityEngine.Object context = null, int? prefixNumber = null,
-            bool showTimestamp = false, bool showOnScreen = false, float duration = 2f,
+            bool showTimestamp = false, bool showOnScreen = false, float duration = 2f, CDebugTag tag = CDebugTag.Default,
             [CallerFilePath] string callerFilePath = "",
             [CallerMemberName] string callerMember = "")
         {
-            string msg = BuildMessage(message, prefixNumber, showTimestamp, callerFilePath, callerMember);
+            if (!TryBuildMessage(message, tag, prefixNumber, showTimestamp, callerFilePath, callerMember,
+                    out string msg))
+                return;
+
             if (showOnScreen)
                 FloatingDebug.Instance.AddMessage(msg, Color.red, duration);
             else
@@ -124,13 +133,14 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
         [Conditional("ENABLE_LOG")]
         public static void LogColor(string message, Color color, int? prefixNumber = null,
-            bool showTimestamp = false, bool showOnScreen = false, float duration = 2f,
+            bool showTimestamp = false, bool showOnScreen = false, float duration = 2f, CDebugTag tag = CDebugTag.Default,
             [CallerFilePath] string callerFilePath = "",
             [CallerMemberName] string callerMember = "")
         {
-            string appliedColorMessage = ApplyColors(message, color);
-            string output = BuildMessage(appliedColorMessage, prefixNumber, showTimestamp, callerFilePath,
-                callerMember);
+            if (!TryBuildMessage(ApplyColors(message, color), tag, prefixNumber, showTimestamp, callerFilePath,
+                    callerMember, out string output))
+                return;
+
             if (showOnScreen)
                 FloatingDebug.Instance.AddMessage(output, color, duration);
             else
@@ -140,13 +150,14 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
         [Conditional("ENABLE_LOG")]
         public static void LogColorWarning(string message, Color color = default, UnityEngine.Object context = null,
             int? prefixNumber = null,
-            bool showTimestamp = false, bool showOnScreen = false, float duration = 2f,
+            bool showTimestamp = false, bool showOnScreen = false, float duration = 2f, CDebugTag tag = CDebugTag.Default,
             [CallerFilePath] string callerFilePath = "",
             [CallerMemberName] string callerMember = "")
         {
-            string appliedColorMessage = ApplyColors(message, color);
-            string output = BuildMessage(appliedColorMessage, prefixNumber, showTimestamp, callerFilePath,
-                callerMember);
+            if (!TryBuildMessage(ApplyColors(message, color), tag, prefixNumber, showTimestamp, callerFilePath,
+                    callerMember, out string output))
+                return;
+
             if (showOnScreen)
                 FloatingDebug.Instance.AddMessage(output, color == default ? Color.yellow : color, duration);
             else
@@ -156,12 +167,14 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
         [Conditional("ENABLE_LOG")]
         public static void LogColorError(string message, Color color = default, UnityEngine.Object context = null, int?
                 prefixNumber = null, bool showTimestamp = false, bool showOnScreen = false, float duration = 2f,
+            CDebugTag tag = CDebugTag.Default,
             [CallerFilePath] string callerFilePath = "",
             [CallerMemberName] string callerMember = "")
         {
-            string appliedColorMessage = ApplyColors(message, color);
-            string output = BuildMessage(appliedColorMessage, prefixNumber, showTimestamp, callerFilePath,
-                callerMember);
+            if (!TryBuildMessage(ApplyColors(message, color), tag, prefixNumber, showTimestamp, callerFilePath,
+                    callerMember, out string output))
+                return;
+
             if (showOnScreen)
                 FloatingDebug.Instance.AddMessage(output, color == default ? Color.red : color, duration);
             else
@@ -174,37 +187,37 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
         [Conditional("ENABLE_LOG")]
         public static void LogFormat(UnityEngine.Object context, string format, int? prefixNumber = null,
-            bool showTimestamp = false, bool showOnScreen = false, float duration = 2f,
+            bool showTimestamp = false, bool showOnScreen = false, float duration = 2f, CDebugTag tag = CDebugTag.Default,
             [CallerFilePath] string callerFilePath = "",
             [CallerMemberName] string callerMember = "",
             params object[] args)
         {
             string message = string.Format(format, args);
-            Log(message, context, prefixNumber, showTimestamp, showOnScreen, duration, callerFilePath,
+            Log(message, context, prefixNumber, showTimestamp, showOnScreen, duration, tag, callerFilePath,
                 callerMember);
         }
 
         [Conditional("ENABLE_LOG")]
         public static void LogWarningFormat(UnityEngine.Object context, string format, int? prefixNumber = null,
-            bool showTimestamp = false, bool showOnScreen = false, float duration = 2f,
+            bool showTimestamp = false, bool showOnScreen = false, float duration = 2f, CDebugTag tag = CDebugTag.Default,
             [CallerFilePath] string callerFilePath = "",
             [CallerMemberName] string callerMember = "",
             params object[] args)
         {
             string message = string.Format(format, args);
-            LogWarning(message, context, prefixNumber, showTimestamp, showOnScreen, duration, callerFilePath,
+            LogWarning(message, context, prefixNumber, showTimestamp, showOnScreen, duration, tag, callerFilePath,
                 callerMember);
         }
 
         [Conditional("ENABLE_LOG")]
         public static void LogErrorFormat(UnityEngine.Object context, string format, int? prefixNumber = null,
-            bool showTimestamp = false, bool showOnScreen = false, float duration = 2f,
+            bool showTimestamp = false, bool showOnScreen = false, float duration = 2f, CDebugTag tag = CDebugTag.Default,
             [CallerFilePath] string callerFilePath = "",
             [CallerMemberName] string callerMember = "",
             params object[] args)
         {
             string message = string.Format(format, args);
-            LogError(message, context, prefixNumber, showTimestamp, showOnScreen, duration, callerFilePath,
+            LogError(message, context, prefixNumber, showTimestamp, showOnScreen, duration, tag, callerFilePath,
                 callerMember);
         }
 
@@ -215,33 +228,33 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
         [Conditional("ENABLE_LOG")]
         public static void LogColorFormat(UnityEngine.Object context, Color color, string format,
             int? prefixNumber = null, bool showTimestamp = false, bool showOnScreen = false,
-            float duration = 2f, [CallerFilePath] string callerFilePath = "",
+            float duration = 2f, CDebugTag tag = CDebugTag.Default, [CallerFilePath] string callerFilePath = "",
             [CallerMemberName] string callerMember = "", params object[] args)
         {
             string message = string.Format(format, args);
-            LogColor(message, color, prefixNumber, showTimestamp, showOnScreen, duration, callerFilePath,
+            LogColor(message, color, prefixNumber, showTimestamp, showOnScreen, duration, tag, callerFilePath,
                 callerMember);
         }
 
         [Conditional("ENABLE_LOG")]
         public static void LogColorWarningFormat(UnityEngine.Object context, string format, Color color = default,
             int? prefixNumber = null, bool showTimestamp = false, bool showOnScreen = false,
-            float duration = 2f, [CallerFilePath] string callerFilePath = "",
+            float duration = 2f, CDebugTag tag = CDebugTag.Default, [CallerFilePath] string callerFilePath = "",
             [CallerMemberName] string callerMember = "", params object[] args)
         {
             string message = string.Format(format, args);
-            LogColorWarning(message, color, context, prefixNumber, showTimestamp, showOnScreen, duration,
+            LogColorWarning(message, color, context, prefixNumber, showTimestamp, showOnScreen, duration, tag,
                 callerFilePath, callerMember);
         }
 
         [Conditional("ENABLE_LOG")]
         public static void LogColorErrorFormat(UnityEngine.Object context, Color color, string format,
             int? prefixNumber = null, bool showTimestamp = false, bool showOnScreen = false,
-            float duration = 2f, [CallerFilePath] string callerFilePath = "",
+            float duration = 2f, CDebugTag tag = CDebugTag.Default, [CallerFilePath] string callerFilePath = "",
             [CallerMemberName] string callerMember = "", params object[] args)
         {
             string message = string.Format(format, args);
-            LogColorError(message, color, context, prefixNumber, showTimestamp, showOnScreen, duration,
+            LogColorError(message, color, context, prefixNumber, showTimestamp, showOnScreen, duration, tag,
                 callerFilePath, callerMember);
         }
 
@@ -252,12 +265,15 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
         [Conditional("ENABLE_LOG")]
         public static void Assert(bool condition, string message = "", UnityEngine.Object context = null,
             int? prefixNumber = null, bool showTimestamp = false, bool showOnScreen = false,
-            float duration = 2f, [CallerFilePath] string callerFilePath = "",
+            float duration = 2f, CDebugTag tag = CDebugTag.Default, [CallerFilePath] string callerFilePath = "",
             [CallerMemberName] string callerMember = "")
         {
             if (!condition)
             {
-                string msg = BuildMessage(message, prefixNumber, showTimestamp, callerFilePath, callerMember);
+                if (!TryBuildMessage(message, tag, prefixNumber, showTimestamp, callerFilePath, callerMember,
+                        out string msg))
+                    return;
+
                 if (showOnScreen)
                     FloatingDebug.Instance.AddMessage(msg, Color.red, duration);
                 else
@@ -268,13 +284,16 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
         [Conditional("ENABLE_LOG")]
         public static void AssertFormat(bool condition, UnityEngine.Object context, string format,
             int? prefixNumber = null, bool showTimestamp = false, bool showOnScreen = false,
-            float duration = 2f, [CallerFilePath] string callerFilePath = "",
+            float duration = 2f, CDebugTag tag = CDebugTag.Default, [CallerFilePath] string callerFilePath = "",
             [CallerMemberName] string callerMember = "", params object[] args)
         {
             if (!condition)
             {
                 string message = string.Format(format, args);
-                string msg = BuildMessage(message, prefixNumber, showTimestamp, callerFilePath, callerMember);
+                if (!TryBuildMessage(message, tag, prefixNumber, showTimestamp, callerFilePath, callerMember,
+                        out string msg))
+                    return;
+
                 if (showOnScreen)
                     FloatingDebug.Instance.AddMessage(msg, Color.red, duration);
                 else
@@ -286,26 +305,39 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
         #region 내부 유틸
 
+        private static bool TryBuildMessage(
+            object message,
+            CDebugTag tag,
+            int? prefixNumber,
+            bool showTimestamp,
+            string callerFilePath,
+            string callerMember,
+            out string output)
+        {
+            if (!CDebugTagFilter.ShouldLog(tag))
+            {
+                output = null;
+                return false;
+            }
+
+            string callerTag = System.IO.Path.GetFileNameWithoutExtension(callerFilePath);
+            output = BuildMessage(message, prefixNumber, showTimestamp, callerTag);
+            return true;
+        }
+
         private static string BuildMessage(
             object message,
             int? prefixNumber,
             bool showTimestamp,
-            string callerFilePath,
-            string callerMember
+            string tag
         )
         {
-            var className = System.IO.Path.GetFileNameWithoutExtension(callerFilePath);
-            string tag = className;
-            // 함수명까지 원하면 ↓
-            // string tag = $"{className}.{callerMember}";
-
             string numberPrefix = prefixNumber.HasValue ? $"#{prefixNumber.Value:000} " : "";
             string tagPrefix = $"[{tag}] ";
             string timestamp = showTimestamp ? $"[{DateTime.Now:HH:mm:ss.fff}] " : "";
 
             return $"{numberPrefix}{tagPrefix}{timestamp}{message}";
         }
-
 
         private static string ApplyColors(string text, Color color)
         {
