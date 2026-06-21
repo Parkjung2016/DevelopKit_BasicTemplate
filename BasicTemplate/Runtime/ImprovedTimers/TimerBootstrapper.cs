@@ -2,10 +2,16 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.LowLevel;
 using UnityEngine.PlayerLoop;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
-    internal static class TimerBootstrapper
+#if UNITY_6000_5_OR_NEWER
+    [AutoStaticsCleanup]
+#endif
+    internal static partial class TimerBootstrapper
     {
         private static PlayerLoopSystem timerSystem;
 

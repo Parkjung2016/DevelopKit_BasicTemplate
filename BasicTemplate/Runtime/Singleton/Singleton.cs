@@ -1,6 +1,13 @@
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
+
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
-    public class Singleton<T> where T : class, new()
+#if UNITY_6000_5_OR_NEWER
+    [AutoStaticsCleanup]
+#endif
+    public partial class Singleton<T> where T : class, new()
     {
         protected static T instance;
 

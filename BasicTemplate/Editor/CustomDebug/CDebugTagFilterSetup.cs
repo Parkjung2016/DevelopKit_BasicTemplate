@@ -1,14 +1,26 @@
 using PJDev.DevelopKit.BasicTemplate.Runtime;
 using UnityEditor;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace PJDev.DevelopKit.BasicTemplate.Editors
 {
     [InitializeOnLoad]
-    public static class CDebugTagFilterSetup
+#if UNITY_6000_5_OR_NEWER
+    [AutoStaticsCleanup]
+#endif
+    public static partial class CDebugTagFilterSetup
     {
         private static bool initialized;
 
         static CDebugTagFilterSetup()
+        {
+            EnsureInitialized();
+        }
+
+        [InitializeOnEnterPlayMode]
+        private static void OnEnterPlayMode()
         {
             EnsureInitialized();
         }

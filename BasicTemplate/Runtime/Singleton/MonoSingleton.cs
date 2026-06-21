@@ -1,4 +1,7 @@
 using UnityEngine;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
@@ -6,7 +9,10 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
     /// 기본적인 싱글톤 - 씬 전환 시 파괴됩니다.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class MonoSingleton<T> : MonoBehaviour where T : Component
+#if UNITY_6000_5_OR_NEWER
+    [AutoStaticsCleanup]
+#endif
+    public abstract partial class MonoSingleton<T> : MonoBehaviour where T : Component
     {
         protected static T instance;
 

@@ -1,9 +1,15 @@
 using System;
 using System.Collections.Generic;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
-    public static class CDebugTagFilter
+#if UNITY_6000_5_OR_NEWER
+    [AutoStaticsCleanup]
+#endif
+    public static partial class CDebugTagFilter
     {
         private static readonly HashSet<string> knownTags = new HashSet<string>();
 

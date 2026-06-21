@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
@@ -10,7 +13,10 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
     {
         #region 화면 로그용 내부 MonoBehaviour
 
-        private class FloatingDebug : MonoBehaviour
+#if UNITY_6000_5_OR_NEWER
+        [AutoStaticsCleanup]
+#endif
+        private partial class FloatingDebug : MonoBehaviour
         {
             public class LogMessage
             {
