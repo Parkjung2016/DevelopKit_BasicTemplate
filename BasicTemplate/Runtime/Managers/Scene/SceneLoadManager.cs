@@ -39,7 +39,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             this.transition = transition;
         }
 
-
+#if UNITASK_INSTALLED
         public async UniTask LoadScene(Enum sceneType, LoadSceneMode loadMode = LoadSceneMode.Single)
         {
             if (transition != null)
@@ -82,9 +82,8 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
                 return;
             }
 
-#if UNITASK_INSTALLED
             await curScene.OnInit();
-#endif
         }
+#endif
     }
 }
