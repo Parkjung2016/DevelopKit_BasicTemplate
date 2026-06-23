@@ -7,7 +7,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
     internal static class CDebugPaths
     {
         private const string TagsFolderName = "Tags";
-        private const string FallbackFolder = "Assets/BasicTemplate/BasicTemplate/Runtime/CustomDebug";
+        private const string FallbackFolder = "Assets/BasicTemplate/Runtime/CustomDebug";
 
         public static string CustomDebugFolder => ResolveCustomDebugFolder();
 
