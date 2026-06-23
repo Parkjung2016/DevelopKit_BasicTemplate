@@ -1,7 +1,7 @@
 {
   "name": "com.pjdev.developkit.basictemplate",
   "displayName": "DevelopKit BasicTemplate",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "unity": "2021.0",
   "unityRelease": "1f1",
   "description": "Provides utilities and systems such as Custom Debug, Singleton, and Addressable Manager.",
