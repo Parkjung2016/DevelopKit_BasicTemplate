@@ -98,7 +98,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             if (showOnScreen)
                 FloatingDebug.Instance.AddMessage(msg, null, duration);
             else
-                UnityEngine.Debug.Log(msg, context);
+                WriteUnityConsole(msg, context, LogType.Log);
         }
 
         [Conditional("ENABLE_LOG")]
@@ -114,7 +114,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             if (showOnScreen)
                 FloatingDebug.Instance.AddMessage(msg, Color.yellow, duration);
             else
-                UnityEngine.Debug.LogWarning(msg, context);
+                WriteUnityConsole(msg, context, LogType.Warning);
         }
 
         [Conditional("ENABLE_LOG")]
@@ -130,7 +130,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             if (showOnScreen)
                 FloatingDebug.Instance.AddMessage(msg, Color.red, duration);
             else
-                UnityEngine.Debug.LogError(msg, context);
+                WriteUnityConsole(msg, context, LogType.Error);
         }
 
         #endregion
@@ -150,7 +150,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             if (showOnScreen)
                 FloatingDebug.Instance.AddMessage(output, color, duration);
             else
-                UnityEngine.Debug.Log(output);
+                WriteUnityConsole(output, null, LogType.Log);
         }
 
         [Conditional("ENABLE_LOG")]
@@ -167,7 +167,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             if (showOnScreen)
                 FloatingDebug.Instance.AddMessage(output, color == default ? Color.yellow : color, duration);
             else
-                UnityEngine.Debug.LogWarning(output, context);
+                WriteUnityConsole(output, context, LogType.Warning);
         }
 
         [Conditional("ENABLE_LOG")]
@@ -184,7 +184,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             if (showOnScreen)
                 FloatingDebug.Instance.AddMessage(output, color == default ? Color.red : color, duration);
             else
-                UnityEngine.Debug.LogError(output, context);
+                WriteUnityConsole(output, context, LogType.Error);
         }
 
         #endregion
@@ -274,17 +274,17 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             float duration = 2f, CDebugTag tag = CDebugTag.Default, [CallerFilePath] string callerFilePath = "",
             [CallerMemberName] string callerMember = "")
         {
-            if (!condition)
-            {
-                if (!TryBuildMessage(message, tag, prefixNumber, showTimestamp, callerFilePath, callerMember,
-                        out string msg))
-                    return;
+            if (condition)
+                return;
 
-                if (showOnScreen)
-                    FloatingDebug.Instance.AddMessage(msg, Color.red, duration);
-                else
-                    UnityEngine.Debug.Assert(false, msg, context);
-            }
+            if (!TryBuildMessage(message, tag, prefixNumber, showTimestamp, callerFilePath, callerMember,
+                    out string msg))
+                return;
+
+            if (showOnScreen)
+                FloatingDebug.Instance.AddMessage(msg, Color.red, duration);
+            else
+                WriteUnityConsole(msg, context, LogType.Assert);
         }
 
         [Conditional("ENABLE_LOG")]
@@ -293,23 +293,42 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             float duration = 2f, CDebugTag tag = CDebugTag.Default, [CallerFilePath] string callerFilePath = "",
             [CallerMemberName] string callerMember = "", params object[] args)
         {
-            if (!condition)
-            {
-                string message = string.Format(format, args);
-                if (!TryBuildMessage(message, tag, prefixNumber, showTimestamp, callerFilePath, callerMember,
-                        out string msg))
-                    return;
+            if (condition)
+                return;
 
-                if (showOnScreen)
-                    FloatingDebug.Instance.AddMessage(msg, Color.red, duration);
-                else
-                    UnityEngine.Debug.Assert(false, msg, context);
-            }
+            string message = string.Format(format, args);
+            if (!TryBuildMessage(message, tag, prefixNumber, showTimestamp, callerFilePath, callerMember,
+                    out string msg))
+                return;
+
+            if (showOnScreen)
+                FloatingDebug.Instance.AddMessage(msg, Color.red, duration);
+            else
+                WriteUnityConsole(msg, context, LogType.Assert);
         }
 
         #endregion
 
         #region 내부 유틸
+
+        private static void WriteUnityConsole(string message, UnityEngine.Object context, LogType logType)
+        {
+            switch (logType)
+            {
+                case LogType.Log:
+                    UnityEngine.Debug.Log(message, context);
+                    break;
+                case LogType.Warning:
+                    UnityEngine.Debug.LogWarning(message, context);
+                    break;
+                case LogType.Error:
+                    UnityEngine.Debug.LogError(message, context);
+                    break;
+                case LogType.Assert:
+                    UnityEngine.Debug.Assert(false, message, context);
+                    break;
+            }
+        }
 
         private static bool TryBuildMessage(
             object message,

@@ -9,7 +9,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
         private const string TagsFolderName = "Tags";
         private const string FallbackFolder = "Assets/BasicTemplate/Runtime/CustomDebug";
 
-        public static string CustomDebugFolder => ResolveCustomDebugFolder();
+        private static string CustomDebugFolder => ResolveCustomDebugFolder();
 
         public static string TagsFolder => $"{CustomDebugFolder}/{TagsFolderName}";
 
@@ -17,16 +17,14 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
 
         public static string EnumFilePath => $"{TagsFolder}/CDebugTag.cs";
 
+        public static string EditorGeneratedFolder =>
+            CustomDebugFolder.Replace("/Runtime/CustomDebug", "/Editor/CustomDebug/Generated");
+
+        public static string ConsoleNavigationGeneratedFilePath =>
+            $"{EditorGeneratedFolder}/{CDebugConsoleNavigationGenerator.GeneratedFileName}";
+
         private static string ResolveCustomDebugFolder()
         {
-            var guids = AssetDatabase.FindAssets("CDebug t:Script");
-            foreach (var guid in guids)
-            {
-                var path = AssetDatabase.GUIDToAssetPath(guid);
-                if (path.EndsWith("/CustomDebug/CDebug.cs"))
-                    return Path.GetDirectoryName(path)?.Replace('\\', '/');
-            }
-
             return FallbackFolder;
         }
     }

@@ -53,7 +53,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
             rootVisualElement.Add(scroll);
 
             var content = new VisualElement();
-            CDebugTagFilterUiStyles.ApplyRootPadding(content);
+            CDebugTagFilterUIStyles.ApplyRootPadding(content);
             scroll.Add(content);
 
             BuildHeader(content);
@@ -91,15 +91,15 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
             tagCountLabel = new Label("0 tags");
             tagCountLabel.style.fontSize = 11;
             tagCountLabel.style.color = new Color(0.65f, 0.65f, 0.65f);
-            tagCountLabel.style.backgroundColor = CDebugTagFilterUiStyles.GroupBackground;
+            tagCountLabel.style.backgroundColor = CDebugTagFilterUIStyles.GroupBackground;
             tagCountLabel.style.borderTopWidth = 1;
             tagCountLabel.style.borderBottomWidth = 1;
             tagCountLabel.style.borderLeftWidth = 1;
             tagCountLabel.style.borderRightWidth = 1;
-            tagCountLabel.style.borderTopColor = CDebugTagFilterUiStyles.BorderColor;
-            tagCountLabel.style.borderBottomColor = CDebugTagFilterUiStyles.BorderColor;
-            tagCountLabel.style.borderLeftColor = CDebugTagFilterUiStyles.BorderColor;
-            tagCountLabel.style.borderRightColor = CDebugTagFilterUiStyles.BorderColor;
+            tagCountLabel.style.borderTopColor = CDebugTagFilterUIStyles.BorderColor;
+            tagCountLabel.style.borderBottomColor = CDebugTagFilterUIStyles.BorderColor;
+            tagCountLabel.style.borderLeftColor = CDebugTagFilterUIStyles.BorderColor;
+            tagCountLabel.style.borderRightColor = CDebugTagFilterUIStyles.BorderColor;
             tagCountLabel.style.borderTopLeftRadius = 10;
             tagCountLabel.style.borderTopRightRadius = 10;
             tagCountLabel.style.borderBottomLeftRadius = 10;
@@ -113,21 +113,21 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
             header.Add(tagCountLabel);
             parent.Add(header);
 
-            pendingWarning = CDebugTagFilterUiStyles.CreateBanner(
+            pendingWarning = CDebugTagFilterUIStyles.CreateBanner(
                 "저장되지 않은 태그 변경사항이 있습니다. Save Tags를 눌러야 CDebugTag enum이 갱신됩니다.");
             parent.Add(pendingWarning);
         }
 
         private void BuildTagDefinitionGroup(VisualElement parent)
         {
-            var group = CDebugTagFilterUiStyles.CreateGroup(
+            var group = CDebugTagFilterUIStyles.CreateGroup(
                 "Tag Definition",
                 "추가/삭제는 임시 반영 · Save Tags 시 enum 생성",
                 out VisualElement body);
 
-            var inputRow = CDebugTagFilterUiStyles.CreateHorizontalRow();
+            var inputRow = CDebugTagFilterUIStyles.CreateHorizontalRow();
             newTagField = new TextField("New Tag") { style = { flexGrow = 1, marginRight = 8 } };
-            var addButton = CDebugTagFilterUiStyles.CreateButton("Add");
+            var addButton = CDebugTagFilterUIStyles.CreateButton("Add");
             addButton.clicked += AddPendingTag;
             inputRow.Add(newTagField);
             inputRow.Add(addButton);
@@ -143,7 +143,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
             });
 
             CreateListScrollView(body, out tagListContent);
-            tagEmptyLabel = CDebugTagFilterUiStyles.CreateEmptyLabel("태그가 없습니다.");
+            tagEmptyLabel = CDebugTagFilterUIStyles.CreateEmptyLabel("태그가 없습니다.");
             body.Add(tagEmptyLabel);
 
             var actionRow = new VisualElement();
@@ -153,10 +153,10 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
             actionRow.style.marginTop = 6;
             actionRow.style.paddingTop = 10;
             actionRow.style.borderTopWidth = 1;
-            actionRow.style.borderTopColor = CDebugTagFilterUiStyles.BorderColor;
+            actionRow.style.borderTopColor = CDebugTagFilterUIStyles.BorderColor;
 
-            revertButton = CDebugTagFilterUiStyles.CreateButton("Revert");
-            saveButton = CDebugTagFilterUiStyles.CreateButton("Save Tags", primary: true);
+            revertButton = CDebugTagFilterUIStyles.CreateButton("Revert");
+            saveButton = CDebugTagFilterUIStyles.CreateButton("Save Tags", primary: true);
             revertButton.clicked += RevertChanges;
             saveButton.clicked += SaveTagChanges;
 
@@ -169,7 +169,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
 
         private void BuildFilterGroup(VisualElement parent)
         {
-            var group = CDebugTagFilterUiStyles.CreateGroup(
+            var group = CDebugTagFilterUIStyles.CreateGroup(
                 "Console Filter",
                 "Play Mode에서 선택한 태그의 CDebug 로그만 출력",
                 out VisualElement body);
@@ -186,13 +186,13 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
             filterSearchField.RegisterValueChangedCallback(_ => RefreshFilterList());
             filterContent.Add(filterSearchField);
 
-            var buttonRow = CDebugTagFilterUiStyles.CreateHorizontalRow();
-            var selectAllButton = CDebugTagFilterUiStyles.CreateButton("Select All");
+            var buttonRow = CDebugTagFilterUIStyles.CreateHorizontalRow();
+            var selectAllButton = CDebugTagFilterUIStyles.CreateButton("Select All");
             selectAllButton.style.flexGrow = 1;
             selectAllButton.style.marginRight = 6;
             selectAllButton.clicked += () => SetAllFilterTags(true);
 
-            var clearAllButton = CDebugTagFilterUiStyles.CreateButton("Clear All");
+            var clearAllButton = CDebugTagFilterUIStyles.CreateButton("Clear All");
             clearAllButton.style.flexGrow = 1;
             clearAllButton.clicked += () => SetAllFilterTags(false);
 
@@ -201,10 +201,10 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
             filterContent.Add(buttonRow);
 
             CreateListScrollView(filterContent, out filterListContent);
-            filterEmptyLabel = CDebugTagFilterUiStyles.CreateEmptyLabel("표시할 태그가 없습니다.");
+            filterEmptyLabel = CDebugTagFilterUIStyles.CreateEmptyLabel("표시할 태그가 없습니다.");
             filterContent.Add(filterEmptyLabel);
 
-            filterWarning = CDebugTagFilterUiStyles.CreateBanner("선택된 태그가 없어 CDebug 로그가 모두 숨겨집니다.");
+            filterWarning = CDebugTagFilterUIStyles.CreateBanner("선택된 태그가 없어 CDebug 로그가 모두 숨겨집니다.");
             filterContent.Add(filterWarning);
 
             body.Add(filterContent);
@@ -213,7 +213,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
 
         private static void CreateListScrollView(VisualElement parent, out VisualElement content)
         {
-            var scroll = CDebugTagFilterUiStyles.CreateListScrollView(out content);
+            var scroll = CDebugTagFilterUIStyles.CreateListScrollView(out content);
             parent.Add(scroll);
         }
 
@@ -239,7 +239,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
                 return;
 
             SetVisible(pendingWarning, HasPendingChanges);
-            CDebugTagFilterUiStyles.SetPrimaryDirty(saveButton, HasPendingChanges, HasPendingChanges);
+            CDebugTagFilterUIStyles.SetPrimaryDirty(saveButton, HasPendingChanges, HasPendingChanges);
             revertButton.SetEnabled(HasPendingChanges);
 
             tagCountLabel.text = $"{pendingTags.Count} tag{(pendingTags.Count == 1 ? string.Empty : "s")}";
@@ -262,7 +262,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
 
             foreach (var tag in pendingTags)
             {
-                tagListContent.Add(CDebugTagFilterUiStyles.CreateTagRow(
+                tagListContent.Add(CDebugTagFilterUIStyles.CreateTagRow(
                     tag,
                     IsPendingTagChange(tag),
                     tag == DefaultTagName,

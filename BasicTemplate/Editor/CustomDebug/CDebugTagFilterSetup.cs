@@ -33,6 +33,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
             var definitions = CDebugTagDefinitionsProvider.GetOrCreate();
             LoadPersistedTags();
             CDebugTagFilter.ShouldLogFunc = ShouldLogTag;
+            CDebugConsoleNavigationGenerator.Generate();
             initialized = true;
         }
 

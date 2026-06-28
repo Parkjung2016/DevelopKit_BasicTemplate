@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 #if UNITASK_INSTALLED
+using System.Threading;
 using Cysharp.Threading.Tasks;
 #endif
 using UnityEngine;
@@ -58,7 +59,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
         public T Instantiate<T>(string key, Transform parent = null) where T : Component
         {
-            GameObject prefab = Load<GameObject>(key);
+            var prefab = Load<GameObject>(key);
 
             if (!prefab)
             {
@@ -75,7 +76,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
         public GameObject Instantiate(string key, Transform parent = null)
         {
-            GameObject prefab = Load<GameObject>(key);
+            var prefab = Load<GameObject>(key);
 
             if (!prefab)
             {
@@ -84,7 +85,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
                 return null;
             }
 
-            GameObject go = Object.Instantiate(prefab, parent);
+            var go = Object.Instantiate(prefab, parent);
             go.gameObject.name = prefab.name;
             return go;
         }
@@ -93,9 +94,86 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
 #if UNITASK_INSTALLED
 
+        #region instantiate async
+
+        public UniTask<T> LoadAssetAsync<T>(string key, CancellationToken cancellationToken = default) where T : Object =>
+            LoadAsync<T>(key, cancellationToken);
+
+        public UniTask<GameObject> InstantiateAsync(
+            string key,
+            Transform parent = null,
+            CancellationToken cancellationToken = default)
+        {
+            return InstantiateInternalAsync(key, parent, cancellationToken);
+        }
+
+        public async UniTask<T> InstantiateAsync<T>(
+            string key,
+            Transform parent = null,
+            CancellationToken cancellationToken = default) where T : Component
+        {
+            GameObject instance = await InstantiateInternalAsync(key, parent, cancellationToken);
+            if (instance == null)
+                return null;
+
+            return instance.GetOrAdd<T>();
+        }
+
+        private async UniTask<GameObject> InstantiateInternalAsync(
+            string key,
+            Transform parent,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                GameObject prefab = Load<GameObject>(key);
+                if (prefab == null)
+                    prefab = await LoadAsync<GameObject>(key, cancellationToken);
+
+                if (prefab == null)
+                {
+                    if (IsDebugging)
+                        CDebug.LogError($"Failed to load prefab: {key}");
+                    return null;
+                }
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                AsyncInstantiateOperation<GameObject> operation = Object.InstantiateAsync(prefab, parent);
+                await operation.ToUniTask(cancellationToken: cancellationToken);
+
+                if (operation.Result == null || operation.Result.Length == 0)
+                {
+                    if (IsDebugging)
+                        CDebug.LogError($"Failed to instantiate prefab: {key}");
+                    return null;
+                }
+
+                GameObject instance = operation.Result[0];
+                instance.name = prefab.name;
+                return instance;
+            }
+            catch (OperationCanceledException)
+            {
+                if (IsDebugging)
+                    CDebug.Log($"InstantiateAsync cancelled: {key}");
+                throw;
+            }
+            catch (Exception e)
+            {
+                if (IsDebugging)
+                    CDebug.LogError($"InstantiateAsync failed for '{key}': {e.Message}");
+                return null;
+            }
+        }
+
+        #endregion
+
         #region addressable
 
-        private async UniTask<T> LoadAsync<T>(string key) where T : Object
+        private async UniTask<T> LoadAsync<T>(string key, CancellationToken cancellationToken = default) where T : Object
         {
             if (_resourcesByName.TryGetValue(key, out LoadedResource loadedResource))
             {
@@ -108,7 +186,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
                 loadKey = $"{key}[{key.Replace(".sprite", "")}]";
 
             var asyncOperation = Addressables.LoadAssetAsync<T>(loadKey);
-            await asyncOperation;
+            await asyncOperation.ToUniTask(cancellationToken: cancellationToken);
 
             if (asyncOperation.Status != AsyncOperationStatus.Succeeded)
             {

@@ -40,6 +40,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
             definitions.EnsureDefaultTagFirst();
             EditorUtility.SetDirty(definitions);
             WriteEnumFile(definitions.Tags);
+            CDebugConsoleNavigationGenerator.Generate();
         }
 
         public static void Generate(IReadOnlyList<string> tags)

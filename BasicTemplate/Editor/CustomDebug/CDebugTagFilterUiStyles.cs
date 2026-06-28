@@ -4,7 +4,7 @@ using UnityEngine.UIElements;
 
 namespace PJDev.DevelopKit.BasicTemplate.Editors
 {
-    internal static class CDebugTagFilterUiStyles
+    internal static class CDebugTagFilterUIStyles
     {
         internal static Color BorderColor => EditorGUIUtility.isProSkin
             ? new Color(0.18f, 0.18f, 0.18f)
