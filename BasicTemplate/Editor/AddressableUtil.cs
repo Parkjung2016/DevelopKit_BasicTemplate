@@ -1,3 +1,4 @@
+using PJDev.DevelopKit.Editors;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
@@ -8,7 +9,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
 {
     public static class AddressableUtil
     {
-        [MenuItem("PJDev/Addressable/Rename Sprites")]
+        [MenuItem("PJDev/Addressable/Rename Sprites", priority = PJDevMenuPriority.Addressable)]
         public static void RenameSprites()
         {
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
