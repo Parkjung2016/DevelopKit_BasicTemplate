@@ -3,6 +3,7 @@ using System.Collections.Generic;
 #if UNITASK_INSTALLED
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using UnityEngine.ResourceManagement.ResourceLocations;
 #endif
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -27,6 +28,8 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
     public class AddressableManager : Singleton<AddressableManager>
     {
+        private const string SpriteKeySuffix = ".sprite";
+
         public delegate void OnResourceLoaded(string key, int loadedCount, int totalCount);
 
         private readonly Dictionary<string, LoadedResource> _resourcesByName =
@@ -39,20 +42,25 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
         public T Load<T>(string key) where T : Object
         {
-            if (_resourcesByName.TryGetValue(key, out LoadedResource loadedResource))
-            {
-                var result = loadedResource.asset as T;
+            if (!_resourcesByName.TryGetValue(key, out LoadedResource loadedResource))
+                return null;
 
-                if (IsDebugging)
-                    CDebug.Log(result);
+            T result = ResolveAsset<T>(loadedResource);
 
-                if (result == null && loadedResource.asset is GameObject go)
-                {
-                    return go.GetComponent<T>();
-                }
+            if (IsDebugging)
+                CDebug.Log(result);
 
+            return result;
+        }
+
+        private static T ResolveAsset<T>(LoadedResource loadedResource) where T : Object
+        {
+            T result = loadedResource.asset as T;
+            if (result != null)
                 return result;
-            }
+
+            if (loadedResource.asset is GameObject go)
+                return go.GetComponent<T>();
 
             return null;
         }
@@ -86,7 +94,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             }
 
             var go = Object.Instantiate(prefab, parent);
-            go.gameObject.name = prefab.name;
+            go.name = prefab.name;
             return go;
         }
 
@@ -173,19 +181,23 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
         #region addressable
 
+        private static bool IsSpriteKey(string key) =>
+            key.EndsWith(SpriteKeySuffix, StringComparison.Ordinal);
+
+        private static string ToSpriteLoadKey(string key)
+        {
+            int baseLength = key.Length - SpriteKeySuffix.Length;
+            return string.Concat(key, "[", key.AsSpan(0, baseLength), "]");
+        }
+
         private async UniTask<T> LoadAsync<T>(string key, CancellationToken cancellationToken = default) where T : Object
         {
             if (_resourcesByName.TryGetValue(key, out LoadedResource loadedResource))
-            {
-                return loadedResource.asset as T;
-            }
+                return ResolveAsset<T>(loadedResource);
 
-            string loadKey = key;
+            string loadKey = IsSpriteKey(key) ? ToSpriteLoadKey(key) : key;
 
-            if (key.Contains(".sprite"))
-                loadKey = $"{key}[{key.Replace(".sprite", "")}]";
-
-            var asyncOperation = Addressables.LoadAssetAsync<T>(loadKey);
+            AsyncOperationHandle<T> asyncOperation = Addressables.LoadAssetAsync<T>(loadKey);
             await asyncOperation.ToUniTask(cancellationToken: cancellationToken);
 
             if (asyncOperation.Status != AsyncOperationStatus.Succeeded)
@@ -197,14 +209,13 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
             T result = asyncOperation.Result;
 
-            loadedResource = new LoadedResource(result, asyncOperation);
-            _resourcesByName.TryAdd(key, loadedResource);
+            _resourcesByName.TryAdd(key, new LoadedResource(result, asyncOperation));
 
             return result;
         }
 
-        public async UniTask LoadALlAsync<T>(string label,
-            OnResourceLoaded callBack = null,
+        public async UniTask LoadAllAsync<T>(string label,
+            OnResourceLoaded callback = null,
             Action OnResourceAllLoaded = null)
             where T : Object
         {
@@ -215,22 +226,13 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
                 return;
             }
 
-            try
-            {
-                await DownloadDependenciesAsync(label);
-            }
-            catch (Exception e)
-            {
-                if (IsDebugging)
-                    CDebug.LogError($"DownloadDependencies failed: {e.Message}");
-            }
+            AsyncOperationHandle<IList<IResourceLocation>> locationsHandle =
+                Addressables.LoadResourceLocationsAsync(label, typeof(T));
+            await locationsHandle.ToUniTask();
 
-            var opHandle = Addressables.LoadResourceLocationsAsync(label, typeof(T));
-            await opHandle;
-
-            if (opHandle.Status != AsyncOperationStatus.Succeeded ||
-                opHandle.Result == null ||
-                opHandle.Result.Count == 0)
+            if (locationsHandle.Status != AsyncOperationStatus.Succeeded ||
+                locationsHandle.Result == null ||
+                locationsHandle.Result.Count == 0)
             {
                 if (IsDebugging)
                     CDebug.LogWarning($"No resources found for label: {label}");
@@ -239,24 +241,44 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
                 return;
             }
 
-            int loadCount = 0;
-            int totalCount = opHandle.Result.Count;
-
-            foreach (var result in opHandle.Result)
+            try
             {
-                bool isSprite = result.PrimaryKey.Contains(".sprite");
-
-                if (isSprite)
-                    await LoadAsync<Sprite>(result.PrimaryKey);
-                else
-                    await LoadAsync<T>(result.PrimaryKey);
-
-                loadCount++;
-                callBack?.Invoke(result.PrimaryKey, loadCount, totalCount);
+                await EnsureDependenciesDownloadedAsync(label);
             }
+            catch (Exception e)
+            {
+                if (IsDebugging)
+                    CDebug.LogError($"DownloadDependencies failed: {e.Message}");
+            }
+
+            IList<IResourceLocation> locations = locationsHandle.Result;
+            int totalCount = locations.Count;
+            int loadedCount = 0;
+            var loadTasks = new UniTask[totalCount];
+
+            for (int i = 0; i < totalCount; i++)
+            {
+                IResourceLocation location = locations[i];
+                loadTasks[i] = LoadLocationAsync(location);
+            }
+
+            await UniTask.WhenAll(loadTasks);
 
             IsLoaded = true;
             OnResourceAllLoaded?.Invoke();
+
+            async UniTask LoadLocationAsync(IResourceLocation location)
+            {
+                string primaryKey = location.PrimaryKey;
+
+                if (IsSpriteKey(primaryKey))
+                    await LoadAsync<Sprite>(primaryKey);
+                else
+                    await LoadAsync<T>(primaryKey);
+
+                int count = Interlocked.Increment(ref loadedCount);
+                callback?.Invoke(primaryKey, count, totalCount);
+            }
         }
 
         public async UniTask<bool> DownloadDependenciesAsync(object label)
@@ -266,8 +288,9 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
             try
             {
-                var locationsHandle = Addressables.LoadResourceLocationsAsync(label);
-                await locationsHandle.Task;
+                AsyncOperationHandle<IList<IResourceLocation>> locationsHandle =
+                    Addressables.LoadResourceLocationsAsync(label);
+                await locationsHandle.ToUniTask();
 
                 if (locationsHandle.Status != AsyncOperationStatus.Succeeded ||
                     locationsHandle.Result == null ||
@@ -278,22 +301,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
                     return false;
                 }
 
-                var sizeHandle = Addressables.GetDownloadSizeAsync(label);
-                await sizeHandle.Task;
-
-                if (sizeHandle.Status != AsyncOperationStatus.Succeeded)
-                    return false;
-
-                if (sizeHandle.Result > 0)
-                {
-                    var downloadHandle = Addressables.DownloadDependenciesAsync(label, true);
-                    await downloadHandle.Task;
-
-                    if (downloadHandle.Status != AsyncOperationStatus.Succeeded)
-                        return false;
-                }
-
-                return true;
+                return await EnsureDependenciesDownloadedAsync(label);
             }
             catch (Exception e)
             {
@@ -301,6 +309,23 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
                     CDebug.LogWarning($"Skipping dependency download for invalid label '{label}': {e.Message}");
                 return false;
             }
+        }
+
+        private static async UniTask<bool> EnsureDependenciesDownloadedAsync(object label)
+        {
+            AsyncOperationHandle<long> sizeHandle = Addressables.GetDownloadSizeAsync(label);
+            await sizeHandle.ToUniTask();
+
+            if (sizeHandle.Status != AsyncOperationStatus.Succeeded)
+                return false;
+
+            if (sizeHandle.Result <= 0)
+                return true;
+
+            AsyncOperationHandle downloadHandle = Addressables.DownloadDependenciesAsync(label, true);
+            await downloadHandle.ToUniTask();
+
+            return downloadHandle.Status == AsyncOperationStatus.Succeeded;
         }
 
         #endregion
