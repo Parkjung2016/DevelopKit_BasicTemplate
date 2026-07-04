@@ -40,11 +40,17 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             return this;
         }
 
-        public AddressableAsyncRequest<T> OnCompleted(Action<T> handler) =>
-            OnCompleted((_, result) => handler(result));
+        public AddressableAsyncRequest<T> OnCompleted(Action<T> handler)
+        {
+            onCompleted = (_, result) => handler(result);
+            return this;
+        }
 
-        public AddressableAsyncRequest<T> OnCompleted(Action<string, T> handler) =>
-            OnCompleted((key, result) => handler(key, result));
+        public AddressableAsyncRequest<T> OnCompleted(Action<string, T> handler)
+        {
+            onCompleted = handler.Invoke;
+            return this;
+        }
 
         public AddressableAsyncRequest<T> OnFailed(AddressableFailedHandler handler)
         {
@@ -52,11 +58,17 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             return this;
         }
 
-        public AddressableAsyncRequest<T> OnFailed(Action<string, Exception> handler) =>
-            OnFailed((key, exception) => handler(key, exception));
+        public AddressableAsyncRequest<T> OnFailed(Action<string, Exception> handler)
+        {
+            onFailed = handler.Invoke;
+            return this;
+        }
 
-        public AddressableAsyncRequest<T> OnFailed(Action<Exception> handler) =>
-            OnFailed((_, exception) => handler(exception));
+        public AddressableAsyncRequest<T> OnFailed(Action<Exception> handler)
+        {
+            onFailed = (_, exception) => handler(exception);
+            return this;
+        }
 
         public AddressableAsyncRequest<T> OnCancelled(AddressableCancelledHandler handler)
         {
@@ -64,11 +76,17 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             return this;
         }
 
-        public AddressableAsyncRequest<T> OnCancelled(Action<string> handler) =>
-            OnCancelled(key => handler(key));
+        public AddressableAsyncRequest<T> OnCancelled(Action<string> handler)
+        {
+            onCancelled = handler.Invoke;
+            return this;
+        }
 
-        public AddressableAsyncRequest<T> OnCancelled(Action handler) =>
-            OnCancelled(_ => handler());
+        public AddressableAsyncRequest<T> OnCancelled(Action handler)
+        {
+            onCancelled = _ => handler();
+            return this;
+        }
 
         public AddressableAsyncRequest<T> WithCancellation(CancellationToken token)
         {
@@ -146,11 +164,14 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             return this;
         }
 
-        public AddressableLoadAllRequest<T> OnFailed(Action<string, Exception> handler) =>
-            OnFailed((key, exception) => handler(key, exception));
+        public AddressableLoadAllRequest<T> OnFailed(Action<string, Exception> handler)
+        {
+            onFailed = handler.Invoke;
+            return this;
+        }
 
         public UniTask RunAsync() =>
-            manager.LoadAllInternalAsync(label, onResourceLoaded, onAllLoaded, onFailed);
+            manager.LoadAllInternalAsync<T>(label, onResourceLoaded, onAllLoaded, onFailed);
 
         public void Run() => RunAsync().Forget();
 
