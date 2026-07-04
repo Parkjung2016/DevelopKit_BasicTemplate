@@ -104,28 +104,28 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
         #region instantiate async
 
-        public UniTask<T> LoadAssetAsync<T>(string key, CancellationToken cancellationToken = default) where T : Object =>
-            LoadAsync<T>(key, cancellationToken);
+        public AddressableAsyncRequest<T> LoadAssetAsync<T>(string key) where T : Object =>
+            new AddressableAsyncRequest<T>(
+                key,
+                ct => LoadAsync<T>(key, ct),
+                static result => result != null);
 
-        public UniTask<GameObject> InstantiateAsync(
-            string key,
-            Transform parent = null,
-            CancellationToken cancellationToken = default)
-        {
-            return InstantiateInternalAsync(key, parent, cancellationToken);
-        }
+        public AddressableAsyncRequest<GameObject> InstantiateAsync(string key, Transform parent = null) =>
+            new AddressableAsyncRequest<GameObject>(
+                key,
+                ct => InstantiateInternalAsync(key, parent, ct),
+                static result => result != null);
 
-        public async UniTask<T> InstantiateAsync<T>(
-            string key,
-            Transform parent = null,
-            CancellationToken cancellationToken = default) where T : Component
-        {
-            GameObject instance = await InstantiateInternalAsync(key, parent, cancellationToken);
-            if (instance == null)
-                return null;
-
-            return instance.GetOrAdd<T>();
-        }
+        public AddressableAsyncRequest<T> InstantiateAsync<T>(string key, Transform parent = null)
+            where T : Component =>
+            new AddressableAsyncRequest<T>(
+                key,
+                async ct =>
+                {
+                    GameObject instance = await InstantiateInternalAsync(key, parent, ct);
+                    return instance != null ? instance.GetOrAdd<T>() : null;
+                },
+                static result => result != null);
 
         private async UniTask<GameObject> InstantiateInternalAsync(
             string key,
@@ -214,58 +214,73 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             return result;
         }
 
-        public async UniTask LoadAllAsync<T>(string label,
-            OnResourceLoaded callback = null,
-            Action OnResourceAllLoaded = null)
-            where T : Object
+        public AddressableLoadAllRequest<T> LoadAllAsync<T>(string label) where T : Object =>
+            new AddressableLoadAllRequest<T>(this, label);
+
+        internal async UniTask LoadAllInternalAsync<T>(
+            string label,
+            OnResourceLoaded onResourceLoaded,
+            Action onAllLoaded,
+            AddressableFailedHandler onFailed) where T : Object
         {
             if (string.IsNullOrEmpty(label))
             {
                 if (IsDebugging)
                     CDebug.LogWarning("Label is null or empty");
+                onFailed?.Invoke(label, new ArgumentException("Label is null or empty.", nameof(label)));
                 return;
             }
 
-            AsyncOperationHandle<IList<IResourceLocation>> locationsHandle =
-                Addressables.LoadResourceLocationsAsync(label, typeof(T));
-            await locationsHandle.ToUniTask();
-
-            if (locationsHandle.Status != AsyncOperationStatus.Succeeded ||
-                locationsHandle.Result == null ||
-                locationsHandle.Result.Count == 0)
-            {
-                if (IsDebugging)
-                    CDebug.LogWarning($"No resources found for label: {label}");
-
-                OnResourceAllLoaded?.Invoke();
-                return;
-            }
+            int totalCount = 0;
+            int loadedCount = 0;
 
             try
             {
-                await EnsureDependenciesDownloadedAsync(label);
+                AsyncOperationHandle<IList<IResourceLocation>> locationsHandle =
+                    Addressables.LoadResourceLocationsAsync(label, typeof(T));
+                await locationsHandle.ToUniTask();
+
+                if (locationsHandle.Status != AsyncOperationStatus.Succeeded ||
+                    locationsHandle.Result == null ||
+                    locationsHandle.Result.Count == 0)
+                {
+                    if (IsDebugging)
+                        CDebug.LogWarning($"No resources found for label: {label}");
+
+                    onAllLoaded?.Invoke();
+                    return;
+                }
+
+                try
+                {
+                    await EnsureDependenciesDownloadedAsync(label);
+                }
+                catch (Exception e)
+                {
+                    if (IsDebugging)
+                        CDebug.LogError($"DownloadDependencies failed: {e.Message}");
+                }
+
+                IList<IResourceLocation> locations = locationsHandle.Result;
+                totalCount = locations.Count;
+                var loadTasks = new UniTask[totalCount];
+
+                for (int i = 0; i < totalCount; i++)
+                {
+                    IResourceLocation location = locations[i];
+                    loadTasks[i] = LoadLocationAsync(location);
+                }
+
+                await UniTask.WhenAll(loadTasks);
+
+                IsLoaded = true;
+                onAllLoaded?.Invoke();
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                if (IsDebugging)
-                    CDebug.LogError($"DownloadDependencies failed: {e.Message}");
+                onFailed?.Invoke(label, exception);
+                throw;
             }
-
-            IList<IResourceLocation> locations = locationsHandle.Result;
-            int totalCount = locations.Count;
-            int loadedCount = 0;
-            var loadTasks = new UniTask[totalCount];
-
-            for (int i = 0; i < totalCount; i++)
-            {
-                IResourceLocation location = locations[i];
-                loadTasks[i] = LoadLocationAsync(location);
-            }
-
-            await UniTask.WhenAll(loadTasks);
-
-            IsLoaded = true;
-            OnResourceAllLoaded?.Invoke();
 
             async UniTask LoadLocationAsync(IResourceLocation location)
             {
@@ -277,11 +292,17 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
                     await LoadAsync<T>(primaryKey);
 
                 int count = Interlocked.Increment(ref loadedCount);
-                callback?.Invoke(primaryKey, count, totalCount);
+                onResourceLoaded?.Invoke(primaryKey, count, totalCount);
             }
         }
 
-        public async UniTask<bool> DownloadDependenciesAsync(object label)
+        public AddressableAsyncRequest<bool> DownloadDependenciesAsync(object label) =>
+            new AddressableAsyncRequest<bool>(
+                label?.ToString() ?? string.Empty,
+                _ => DownloadDependenciesInternalAsync(label),
+                static result => result);
+
+        private async UniTask<bool> DownloadDependenciesInternalAsync(object label)
         {
             if (label == null)
                 return false;
@@ -332,17 +353,32 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
         #region scene
 
-        public async UniTask<SceneInstance> LoadSceneAsync(string key,
-            LoadSceneMode sceneMode = LoadSceneMode.Single)
-        {
-            return await Addressables.LoadSceneAsync(key, sceneMode);
-        }
+        public AddressableAsyncRequest<SceneInstance> LoadSceneAsync(
+            string key,
+            LoadSceneMode sceneMode = LoadSceneMode.Single) =>
+            new AddressableAsyncRequest<SceneInstance>(
+                key,
+                async ct =>
+                {
+                    AsyncOperationHandle<SceneInstance> handle =
+                        Addressables.LoadSceneAsync(key, sceneMode);
+                    await handle.ToUniTask(cancellationToken: ct);
+                    return handle.Status == AsyncOperationStatus.Succeeded ? handle.Result : default;
+                },
+                static result => result.Scene.IsValid());
 
-        public async UniTask<SceneInstance> UnloadSceneAsync(
-            AsyncOperationHandle<SceneInstance> sceneInstanceHandle)
-        {
-            return await Addressables.UnloadSceneAsync(sceneInstanceHandle);
-        }
+        public AddressableAsyncRequest<SceneInstance> UnloadSceneAsync(
+            AsyncOperationHandle<SceneInstance> sceneInstanceHandle) =>
+            new AddressableAsyncRequest<SceneInstance>(
+                "UnloadScene",
+                async ct =>
+                {
+                    AsyncOperationHandle<SceneInstance> handle =
+                        Addressables.UnloadSceneAsync(sceneInstanceHandle);
+                    await handle.ToUniTask(cancellationToken: ct);
+                    return handle.Status == AsyncOperationStatus.Succeeded ? handle.Result : default;
+                },
+                static result => result.Scene.IsValid());
 
         #endregion
 
