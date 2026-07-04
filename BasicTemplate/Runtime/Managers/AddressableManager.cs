@@ -187,7 +187,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
         private static string ToSpriteLoadKey(string key)
         {
             int baseLength = key.Length - SpriteKeySuffix.Length;
-            return string.Concat(key, "[", key.AsSpan(0, baseLength), "]");
+            return string.Concat(key, "[", key.Substring(0, baseLength), "]");
         }
 
         private async UniTask<T> LoadAsync<T>(string key, CancellationToken cancellationToken = default) where T : Object
