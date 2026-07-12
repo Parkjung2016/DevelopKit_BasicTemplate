@@ -16,23 +16,23 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     public struct LoadedResource
     {
-        public Object asset;
-        public AsyncOperationHandle handle;
+        public readonly Object Asset;
+        public readonly AsyncOperationHandle Handle;
 
         public LoadedResource(Object asset, AsyncOperationHandle handle)
         {
-            this.asset = asset;
-            this.handle = handle;
+            this.Asset = asset;
+            this.Handle = handle;
         }
     }
 
     public class AddressableManager : Singleton<AddressableManager>
     {
-        private const string SpriteKeySuffix = ".sprite";
+        private const string SUFFIX_SPRITE_KEY = ".sprite";
 
         public delegate void OnResourceLoaded(string key, int loadedCount, int totalCount);
 
-        private readonly Dictionary<string, LoadedResource> _resourcesByName =
+        private readonly Dictionary<string, LoadedResource> resourcesByName =
             new Dictionary<string, LoadedResource>();
 
         public bool IsDebugging = true;
@@ -42,7 +42,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
         public T Load<T>(string key) where T : Object
         {
-            if (!_resourcesByName.TryGetValue(key, out LoadedResource loadedResource))
+            if (!resourcesByName.TryGetValue(key, out LoadedResource loadedResource))
                 return null;
 
             T result = ResolveAsset<T>(loadedResource);
@@ -55,11 +55,11 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
         private static T ResolveAsset<T>(LoadedResource loadedResource) where T : Object
         {
-            T result = loadedResource.asset as T;
+            T result = loadedResource.Asset as T;
             if (result != null)
                 return result;
 
-            if (loadedResource.asset is GameObject go)
+            if (loadedResource.Asset is GameObject go)
                 return go.GetComponent<T>();
 
             return null;
@@ -182,17 +182,18 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
         #region addressable
 
         private static bool IsSpriteKey(string key) =>
-            key.EndsWith(SpriteKeySuffix, StringComparison.Ordinal);
+            key.EndsWith(SUFFIX_SPRITE_KEY, StringComparison.Ordinal);
 
         private static string ToSpriteLoadKey(string key)
         {
-            int baseLength = key.Length - SpriteKeySuffix.Length;
+            int baseLength = key.Length - SUFFIX_SPRITE_KEY.Length;
             return string.Concat(key, "[", key.Substring(0, baseLength), "]");
         }
 
-        private async UniTask<T> LoadAsync<T>(string key, CancellationToken cancellationToken = default) where T : Object
+        private async UniTask<T> LoadAsync<T>(string key, CancellationToken cancellationToken = default)
+            where T : Object
         {
-            if (_resourcesByName.TryGetValue(key, out LoadedResource loadedResource))
+            if (resourcesByName.TryGetValue(key, out LoadedResource loadedResource))
                 return ResolveAsset<T>(loadedResource);
 
             string loadKey = IsSpriteKey(key) ? ToSpriteLoadKey(key) : key;
@@ -209,7 +210,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
             T result = asyncOperation.Result;
 
-            _resourcesByName.TryAdd(key, new LoadedResource(result, asyncOperation));
+            resourcesByName.TryAdd(key, new LoadedResource(result, asyncOperation));
 
             return result;
         }

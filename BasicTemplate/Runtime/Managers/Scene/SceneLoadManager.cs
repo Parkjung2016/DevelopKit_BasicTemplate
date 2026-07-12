@@ -10,7 +10,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     public class SceneLoadManager : PersistentMonoSingleton<SceneLoadManager>
     {
-        [SerializeField] private SceneTransitionBase transition;
+        [SerializeField] private InterfaceReference<ISceneTransition> transition;
 
         private BaseScene curScene;
 
@@ -29,27 +29,30 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             return curScene;
         }
 
-        public void SetTransition(SceneTransitionBase transition)
+        public void SetTransition(ISceneTransition transition)
         {
             if (this.transition != null)
             {
-                Destroy(transition.gameObject);
+                Destroy(this.transition.Value.Go);
             }
 
-            this.transition = transition;
+            if (this.transition == null)
+                this.transition = new InterfaceReference<ISceneTransition>();
+
+            this.transition.Value = transition;
         }
 
 #if UNITASK_INSTALLED
         public async UniTask LoadScene(Enum sceneType, LoadSceneMode loadMode = LoadSceneMode.Single)
         {
             if (transition != null)
-                await transition.OnFadeIn();
+                await transition.Value.OnFadeIn();
 
             await LoadSceneAsync(sceneType.ToString(), loadMode);
             await InitializeScene();
 
             if (transition != null)
-                await transition.OnFadeOut();
+                await transition.Value.OnFadeOut();
 
             curScene.OnAfterInit();
         }
