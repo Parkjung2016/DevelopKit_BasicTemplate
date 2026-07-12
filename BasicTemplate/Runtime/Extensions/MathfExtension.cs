@@ -1,6 +1,14 @@
+using UnityEngine;
+
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
-public static class MathfExtension {
+    public static class MathfExtension
+    {
+        public static float Remap(this float value, float from1, float to1, float from2, float to2)
+        {
+            return Mathf.Lerp(from2, to2, Mathf.InverseLerp(from1, to1, value));
+        }
+
         #region Min
 
 #if ENABLED_UNITY_MATHEMATICS
@@ -25,19 +33,24 @@ public static class MathfExtension {
         }
 #endif
 
-        public static double Min(double a, double b) {
+        public static double Min(double a, double b)
+        {
             return (a < b) ? a : b;
         }
 
-        public static double Min(params double[] values) {
+        public static double Min(params double[] values)
+        {
             int num = values.Length;
-            if (num == 0) {
+            if (num == 0)
+            {
                 return 0f;
             }
 
             double num2 = values[0];
-            for (int i = 1; i < num; i++) {
-                if (values[i] < num2) {
+            for (int i = 1; i < num; i++)
+            {
+                if (values[i] < num2)
+                {
                     num2 = values[i];
                 }
             }
@@ -71,19 +84,24 @@ public static class MathfExtension {
         }
 #endif
 
-        public static double Max(double a, double b) {
+        public static double Max(double a, double b)
+        {
             return (a > b) ? a : b;
         }
 
-        public static double Max(params double[] values) {
+        public static double Max(params double[] values)
+        {
             int num = values.Length;
-            if (num == 0) {
+            if (num == 0)
+            {
                 return 0f;
             }
 
             double num2 = values[0];
-            for (int i = 1; i < num; i++) {
-                if (values[i] > num2) {
+            for (int i = 1; i < num; i++)
+            {
+                if (values[i] > num2)
+                {
                     num2 = values[i];
                 }
             }

@@ -6,7 +6,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     public static class ListExtensions
     {
-        static Random rnd;
+        private static Random rnd;
 
         /// <summary>
         /// 컬렉션이 null이거나 요소가 하나도 없는지 확인합니다.
@@ -61,8 +61,9 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
             return list;
         }
-        
-        public static void RefreshWith<T>(this List<T> list, IEnumerable<T> items) {
+
+        public static void RefreshWith<T>(this List<T> list, IEnumerable<T> items)
+        {
             list.Clear();
             list.AddRange(items);
         }

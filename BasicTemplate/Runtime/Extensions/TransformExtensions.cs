@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -6,6 +7,77 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     public static class TransformExtensions
     {
+        /// <summary>
+        /// <see cref="Pose"/>를 사용하여 Transform의 위치와 회전을 설정합니다.
+        /// </summary>
+        /// <param name="transform">설정할 Transform입니다.</param>
+        /// <param name="pose">월드 위치와 월드 회전을 포함한 Pose입니다.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="transform"/>가 null인 경우 발생합니다.
+        /// </exception>
+        /// <example>
+        /// <code>
+        /// Pose savedPose = savePoint.GetPose();
+        /// cameraRig.SetPose(savedPose);
+        /// </code>
+        /// </example>
+        public static void SetPose(this Transform transform, in Pose pose)
+        {
+            if (!transform) throw new ArgumentNullException(nameof(transform));
+
+            transform.SetPositionAndRotation(pose.position, pose.rotation);
+        }
+
+        /// <summary>
+        /// Transform의 현재 위치와 회전을 <see cref="Pose"/>로 반환합니다.
+        /// </summary>
+        /// <param name="transform">정보를 가져올 Transform입니다.</param>
+        /// <returns>월드 위치와 월드 회전을 포함한 Pose입니다.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="transform"/>가 null인 경우 발생합니다.
+        /// </exception>
+        /// <example>
+        /// <code>
+        /// Pose handPose = handTransform.GetPose();
+        /// </code>
+        /// </example>
+        public static Pose GetPose(this Transform transform)
+        {
+            if (!transform) throw new ArgumentNullException(nameof(transform));
+
+            transform.GetPositionAndRotation(out var position, out var rotation);
+            return new Pose(position, rotation);
+        }
+
+        /// <summary>
+        /// 루트부터 현재 Transform까지의 전체 계층 경로를 반환합니다.
+        /// </summary>
+        /// <param name="transform">계층 경로를 가져올 Transform입니다.</param>
+        /// <returns>'/'로 구분된 계층 경로 문자열입니다.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="transform"/>가 null인 경우 발생합니다.
+        /// </exception>
+        /// <example>
+        /// <code>
+        /// // 반환 예시: "World/Enemies/Boss"
+        /// string hierarchyPath = bossRoot.GetHierarchyPath();
+        /// </code>
+        /// </example>
+        public static string GetHierarchyPath(this Transform transform)
+        {
+            if (!transform) throw new ArgumentNullException(nameof(transform));
+
+            var path = transform.name;
+
+            while (transform.parent != null)
+            {
+                transform = transform.parent;
+                path = $"{transform.name}/{path}";
+            }
+
+            return path;
+        }
+
         /// <summary>
         /// 지정한 Transform이 목표 Transform으로부터 특정 거리 이내에 있고, (선택적으로) 특정 각도(FOV) 이내에 있는지 확인합니다.
         /// </summary>

@@ -100,5 +100,25 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             Vector3 position = new Vector3(direction.x, 0, direction.y) * distance;
             return origin + position;
         }
+        
+        /// <summary>
+        /// Vector3의 각 축 값을 지정한 양자화 단위의 가장 가까운 아래 배수로 내림합니다.
+        /// 정밀도를 낮추거나 위치를 그리드에 스냅할 때 유용하며,
+        /// NavMesh 재빌드 횟수를 줄이거나 이동 업데이트를 일정 간격으로 처리하는 등의 용도로 사용할 수 있습니다.
+        /// </summary>
+        /// <param name="position">양자화할 원본 Vector3 위치입니다.</param>
+        /// <param name="quantization">각 축(x, y, z)에 적용할 양자화 단위입니다.</param>
+        /// <returns>
+        /// 각 축이 해당 양자화 단위의 가장 가까운 아래 배수로 내림된 새로운 Vector3를 반환합니다.
+        /// </returns>
+        public static Vector3 Quantize(this Vector3 position, Vector3 quantization) {
+            return Vector3.Scale(
+                quantization,
+                new Vector3(
+                    Mathf.Floor(position.x / quantization.x),
+                    Mathf.Floor(position.y / quantization.y),
+                    Mathf.Floor(position.z / quantization.z)
+                ));
+        }
     }
 }

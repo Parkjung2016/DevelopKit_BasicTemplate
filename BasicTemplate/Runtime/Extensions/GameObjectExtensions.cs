@@ -6,6 +6,26 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
     public static class GameObjectExtensions
     {
         /// <summary>
+        /// GameObject의 레이어가 지정한 LayerMask에 포함되어 있는지 확인합니다.
+        /// </summary>
+        /// <param name="gameObject">레이어를 확인할 GameObject입니다.</param>
+        /// <param name="mask">비교할 LayerMask입니다.</param>
+        /// <returns>
+        /// GameObject의 레이어가 LayerMask에 포함되어 있으면 true를,
+        /// 그렇지 않으면 false를 반환합니다.
+        /// </returns>
+        /// <example>
+        /// <code>
+        /// if (target.IsInLayerMask(attackableMask)) {
+        ///     Attack(target);
+        /// }
+        /// </code>
+        /// </example>
+        public static bool IsInLayerMask(this GameObject gameObject, LayerMask mask) {
+            return (mask.value & (1 << gameObject.layer)) != 0;
+        }
+        
+        /// <summary>
         /// GameObject를 Hierarchy 창에서 숨깁니다.
         /// </summary>
         /// <param name="gameObject"></param>

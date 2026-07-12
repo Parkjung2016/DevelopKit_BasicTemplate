@@ -58,6 +58,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
         {
             return type.IsValueType ? Activator.CreateInstance(type) : null;
         }
+
         /// <summary>
         /// 지정된 타입이 제네릭 타입 매개변수 T로부터 할당 가능한지 확인합니다.
         /// </summary>

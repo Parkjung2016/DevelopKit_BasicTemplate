@@ -2,10 +2,12 @@ using UnityEngine;
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
-    public static class NumberExtensions {
-        public static float PercentageOf(this int part, int whole) {
+    public static class NumberExtensions
+    {
+        public static float PercentageOf(this int part, int whole)
+        {
             if (whole == 0) return 0; // Handling division by zero
-            return (float) part / whole;
+            return (float)part / whole;
         }
 
         public static bool Approx(this float f1, float f2) => Mathf.Approximately(f1, f2);
