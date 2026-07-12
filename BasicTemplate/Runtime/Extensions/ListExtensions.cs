@@ -1,11 +1,24 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
+using Random = System.Random;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     public static class ListExtensions
     {
+#if UNITY_6000_5_OR_NEWER
+        [AutoStaticsCleanup]
+#else
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics()
+        {
+            rnd = null;
+        }
+#endif
         private static Random rnd;
 
         /// <summary>
