@@ -1,5 +1,6 @@
-using PJDev.DevelopKit.Editors;
+using System.IO;
 using UnityEditor;
+using UnityEngine;
 
 namespace PJDev.DevelopKit.BasicTemplate.Editors
 {
@@ -13,11 +14,42 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
 
         static Extender()
         {
-            bool checkUniTaskInstalled = DevelopKitEditorUtility.CheckPackageInstalled(UNITASK_NAME);
+            bool checkUniTaskInstalled = CheckPackageInstalled(UNITASK_NAME);
             if (!checkUniTaskInstalled)
             {
-                DevelopKitEditorUtility.AddPackage(UNITASK_NAME, UNITASK_URL);
+                AddPackage(UNITASK_NAME, UNITASK_URL);
             }
+        }
+        
+        public static void AddPackage(string name, string url)
+        {
+            string manifestPath = Path.Combine(Application.dataPath.Replace("Assets", string.Empty),
+                "Packages/manifest.json");
+            if (!File.Exists(manifestPath))
+            {
+                Debug.LogError($"manifest.json not found at '{manifestPath}'");
+                return;
+            }
+
+            string manifestText = File.ReadAllText(manifestPath);
+            if (!manifestText.Contains(name))
+            {
+                Debug.Log($"{name} not found in manifest.json");
+                var modifiedText = manifestText.Insert(manifestText.IndexOf("dependencies") + 17,
+                    $"\t\"{name}\": \"{url}\",\n");
+                File.WriteAllText(manifestPath, modifiedText);
+                Debug.Log($"Added {name} to manifest.json");
+            }
+
+            UnityEditor.PackageManager.Client.Resolve();
+        }
+        
+        public static bool CheckPackageInstalled(string packageName)
+        {
+            string manifestPath = Path.Combine(Application.dataPath.Replace("Assets", string.Empty),
+                "Packages/manifest.json");
+            string manifestText = File.ReadAllText(manifestPath);
+            return manifestText.Contains(packageName);
         }
     }
 }

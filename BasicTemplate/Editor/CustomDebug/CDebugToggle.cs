@@ -1,4 +1,3 @@
-using PJDev.DevelopKit.Editors;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEditor.Build;
@@ -12,7 +11,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
     {
         private const string SYMBOL = "ENABLE_LOG";
         private const string MENU_PATH = "PJDev/Toggle Debug Logs";
-        private const int MenuPriority = PJDevMenuPriority.CDebug + 1;
+        private const int MenuPriority = -9599;
 
         private static bool prevToggle;
 

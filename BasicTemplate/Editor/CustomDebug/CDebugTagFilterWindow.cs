@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using PJDev.DevelopKit.BasicTemplate.Runtime;
-using PJDev.DevelopKit.Editors;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -32,7 +31,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors
         private VisualElement filterListContent;
         private Label filterEmptyLabel;
 
-        [MenuItem("PJDev/CDebug Tag Filter", priority = PJDevMenuPriority.CDebug)]
+        [MenuItem("PJDev/CDebug Tag Filter", priority = -9600)]
         public static void ShowWindow()
         {
             var window = GetWindow<CDebugTagFilterWindow>("CDebug Tags");
