@@ -9,7 +9,7 @@ using Unity.Scripting.LifecycleManagement;
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
-    public static class CDebug
+    public static partial class CDebug
     {
         #region 화면 로그용 내부 MonoBehaviour
 

@@ -8,7 +8,7 @@ using Unity.Scripting.LifecycleManagement;
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
-    public static class ListExtensions
+    public static partial class ListExtensions
     {
 #if UNITY_6000_5_OR_NEWER
         [AutoStaticsCleanup]

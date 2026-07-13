@@ -11,8 +11,14 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 #endif
     public static partial class WaitFor
     {
+#if UNITY_6000_5_OR_NEWER
+        [NoAutoStaticsCleanup]
+#endif
         public static WaitForFixedUpdate FixedUpdate { get; } = new WaitForFixedUpdate();
 
+#if UNITY_6000_5_OR_NEWER
+        [NoAutoStaticsCleanup]
+#endif
         public static WaitForEndOfFrame EndOfFrame { get; } = new WaitForEndOfFrame();
 
         private static readonly Dictionary<float, WaitForSeconds> waitForSecondsDic =
