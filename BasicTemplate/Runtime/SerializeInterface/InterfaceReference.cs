@@ -11,19 +11,34 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
         public TInterface Value
         {
-            get => underlyingValue switch
+            get
             {
-                null => null,
-                TInterface @interface => @interface,
-                _ => throw new InvalidOperationException(
-                    $"{underlyingValue} needs to implement interface {nameof(TInterface)}.")
-            };
-            set => underlyingValue = value switch
+                Object unityObject = underlyingValue;
+                if (unityObject == null)
+                    return null;
+
+                if (underlyingValue is TInterface @interface)
+                    return @interface;
+
+                throw new InvalidOperationException(
+                    $"{underlyingValue} needs to implement interface {nameof(TInterface)}.");
+            }
+            set
             {
-                null => null,
-                TObject newValue => newValue,
-                _ => throw new ArgumentException($"{value} needs to be of type {typeof(TObject)}.", string.Empty)
-            };
+                if (value == null)
+                {
+                    underlyingValue = null;
+                    return;
+                }
+
+                if (value is TObject newValue)
+                {
+                    underlyingValue = newValue;
+                    return;
+                }
+
+                throw new ArgumentException($"{value} needs to be of type {typeof(TObject)}.", string.Empty);
+            }
         }
 
         public TObject UnderlyingValue
