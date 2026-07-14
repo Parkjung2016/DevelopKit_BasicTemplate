@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {

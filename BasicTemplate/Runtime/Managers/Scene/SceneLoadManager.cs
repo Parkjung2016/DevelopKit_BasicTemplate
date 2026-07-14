@@ -45,13 +45,13 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 #if UNITASK_INSTALLED
         public async UniTask LoadScene(Enum sceneType, LoadSceneMode loadMode = LoadSceneMode.Single)
         {
-            if (transition != null)
+            if (transition is { Value: not null })
                 await transition.Value.OnFadeIn();
 
             await LoadSceneAsync(sceneType.ToString(), loadMode);
             await InitializeScene();
 
-            if (transition != null)
+            if (transition is { Value: not null })
                 await transition.Value.OnFadeOut();
 
             curScene.OnAfterInit();
