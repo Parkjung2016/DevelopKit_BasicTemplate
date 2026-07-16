@@ -1,0 +1,14 @@
+{
+    "name": "PJDev.DevelopKit.BasicTemplate.Runtime.PoolSystem",
+    "rootNamespace": "PJDev.DevelopKit.BasicTemplate.Runtime.PoolSystem",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

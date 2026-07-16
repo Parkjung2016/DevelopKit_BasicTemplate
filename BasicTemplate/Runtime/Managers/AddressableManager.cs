@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 #if UNITASK_INSTALLED
 using System.Threading;
@@ -10,6 +10,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.SceneManagement;
+using PJDev.DevelopKit.BasicTemplate.Runtime.PoolSystem;
 using Object = UnityEngine.Object;
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
@@ -65,7 +66,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             return null;
         }
 
-        public T Instantiate<T>(string key, Transform parent = null) where T : Component
+        public T Instantiate<T>(string key, Transform parent = null, bool usePool = false) where T : Component
         {
             var prefab = Load<GameObject>(key);
 
@@ -76,13 +77,15 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
                 return null;
             }
 
-            var prefabInstantiate = Object.Instantiate(prefab, parent);
+            GameObject prefabInstantiate = usePool
+                ? PrefabPool.Spawn(prefab, parent)
+                : Object.Instantiate(prefab, parent);
             T comp = prefabInstantiate.GetOrAdd<T>();
             comp.gameObject.name = prefab.name;
             return comp;
         }
 
-        public GameObject Instantiate(string key, Transform parent = null)
+        public GameObject Instantiate(string key, Transform parent = null, bool usePool = false)
         {
             var prefab = Load<GameObject>(key);
 
@@ -93,10 +96,31 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
                 return null;
             }
 
-            var go = Object.Instantiate(prefab, parent);
+            GameObject go = usePool
+                ? PrefabPool.Spawn(prefab, parent)
+                : Object.Instantiate(prefab, parent);
             go.name = prefab.name;
             return go;
         }
+
+        /// <summary>
+        /// 풀에서 생성한 인스턴스는 반환하고, 일반 인스턴스는 제거합니다.
+        /// 반환값은 풀로 돌아갔는지를 나타냅니다.
+        /// </summary>
+        public bool ReleaseInstance(GameObject instance)
+        {
+            if (instance == null)
+                return false;
+
+            if (PrefabPool.Release(instance))
+                return true;
+
+            Object.Destroy(instance);
+            return false;
+        }
+
+        public bool ReleaseInstance(Component instance) =>
+            instance != null && ReleaseInstance(instance.gameObject);
 
         #endregion
 
@@ -110,19 +134,25 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
                 ct => LoadAsync<T>(key, ct),
                 static result => result != null);
 
-        public AddressableAsyncRequest<GameObject> InstantiateAsync(string key, Transform parent = null) =>
+        public AddressableAsyncRequest<GameObject> InstantiateAsync(
+            string key,
+            Transform parent = null,
+            bool usePool = false) =>
             new AddressableAsyncRequest<GameObject>(
                 key,
-                ct => InstantiateInternalAsync(key, parent, ct),
+                ct => InstantiateInternalAsync(key, parent, usePool, ct),
                 static result => result != null);
 
-        public AddressableAsyncRequest<T> InstantiateAsync<T>(string key, Transform parent = null)
+        public AddressableAsyncRequest<T> InstantiateAsync<T>(
+            string key,
+            Transform parent = null,
+            bool usePool = false)
             where T : Component =>
             new AddressableAsyncRequest<T>(
                 key,
                 async ct =>
                 {
-                    GameObject instance = await InstantiateInternalAsync(key, parent, ct);
+                    GameObject instance = await InstantiateInternalAsync(key, parent, usePool, ct);
                     return instance != null ? instance.GetOrAdd<T>() : null;
                 },
                 static result => result != null);
@@ -130,8 +160,10 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
         private async UniTask<GameObject> InstantiateInternalAsync(
             string key,
             Transform parent,
+            bool usePool,
             CancellationToken cancellationToken)
         {
+            AsyncInstantiateOperation<GameObject> operation = null;
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -149,7 +181,10 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                AsyncInstantiateOperation<GameObject> operation = Object.InstantiateAsync(prefab, parent);
+                if (usePool)
+                    return PrefabPool.Spawn(prefab, parent);
+
+                operation = Object.InstantiateAsync(prefab, parent);
                 await operation.ToUniTask(cancellationToken: cancellationToken);
 
                 if (operation.Result == null || operation.Result.Length == 0)
@@ -165,6 +200,21 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             }
             catch (OperationCanceledException)
             {
+                if (operation != null)
+                {
+                    if (!operation.isDone)
+                    {
+                        operation.Cancel();
+                    }
+                    else if (operation.Result != null)
+                    {
+                        for (int i = 0; i < operation.Result.Length; i++)
+                        {
+                            if (operation.Result[i] != null)
+                                Object.Destroy(operation.Result[i]);
+                        }
+                    }
+                }
                 if (IsDebugging)
                     CDebug.Log($"InstantiateAsync cancelled: {key}");
                 throw;

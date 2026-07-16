@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
-    [CreateAssetMenu(fileName = "CDebugTagDefinitions", menuName = "PJDev/SO/CDebug Tag Definitions")]
+    [CreateAssetMenu(fileName = "CDebugTagDefinitions", menuName = "PJDev/CDebug/CDebug Tag Definitions")]
     public class CDebugTagDefinitions : ScriptableObject
     {
         private const string DefaultTagName = "Default";

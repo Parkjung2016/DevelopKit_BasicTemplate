@@ -3,7 +3,8 @@
     "rootNamespace": "PJDev.Developkit.BasicTemplate.Editors",
     "references": [
         "Unity.Addressables.Editor",
-        "PJDev.Developkit.BasicTemplate.Runtime"
+        "PJDev.Developkit.BasicTemplate.Runtime",
+        "GUID:6f09b1a273c34b8ea6a1c42c7d5f9012"
     ],
     "includePlatforms": [
         "Editor"
