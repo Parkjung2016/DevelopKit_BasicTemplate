@@ -8,7 +8,8 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors.PoolSystem
 {
     public sealed class PoolMonitorWindow : EditorWindow
     {
-        private const string StylePath = "Assets/BasicTemplate/BasicTemplate/Editor/PoolSystem/PoolMonitorWindow.uss";
+        private const string StyleGuid = "321484bb34de4f2da38b576b6cecc20d";
+        private static StyleSheet cachedStyleSheet;
 
         private readonly List<PrefabPoolStats> stats = new();
 
@@ -30,7 +31,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors.PoolSystem
             rootVisualElement.Clear();
             rootVisualElement.AddToClassList("pool-monitor");
 
-            StyleSheet style = AssetDatabase.LoadAssetAtPath<StyleSheet>(StylePath);
+            StyleSheet style = GetStyleSheet();
             if (style != null)
                 rootVisualElement.styleSheets.Add(style);
 
@@ -64,6 +65,19 @@ namespace PJDev.DevelopKit.BasicTemplate.Editors.PoolSystem
 
             rootVisualElement.schedule.Execute(Refresh).Every(500);
             Refresh();
+        }
+
+        private static StyleSheet GetStyleSheet()
+        {
+            if (cachedStyleSheet != null)
+                return cachedStyleSheet;
+
+            string path = AssetDatabase.GUIDToAssetPath(StyleGuid);
+            if (string.IsNullOrEmpty(path))
+                return null;
+
+            cachedStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(path);
+            return cachedStyleSheet;
         }
 
         private VisualElement BuildToolbar()
