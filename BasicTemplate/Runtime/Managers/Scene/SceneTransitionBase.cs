@@ -1,4 +1,4 @@
-#if UNITASK_INSTALLED
+﻿#if UNITASK_INSTALLED
 using Cysharp.Threading.Tasks;
 #endif
 using UnityEngine;
@@ -7,13 +7,18 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     public abstract class SceneTransitionBase : MonoBehaviour, ISceneTransition
     {
-        public GameObject Go => gameObject;
-        
-        protected virtual void Awake()
+        protected virtual void OnEnable()
         {
-            SceneLoadManager.Instance.SetTransition(this);
+            if (Application.isPlaying)
+                SceneLoadManager.Instance.SetTransition(this);
         }
-        
+
+        protected virtual void OnDisable()
+        {
+            if (SceneLoadManager.HasInstance)
+                SceneLoadManager.Instance.ClearTransition(this);
+        }
+
 #if UNITASK_INSTALLED
         public abstract UniTask OnFadeOut();
         public abstract UniTask OnFadeIn();

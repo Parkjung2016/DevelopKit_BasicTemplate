@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -8,84 +8,113 @@ using Cysharp.Threading.Tasks;
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
-    public class SceneLoadManager : PersistentMonoSingleton<SceneLoadManager>
+    /// <summary>화면 전환 효과와 BaseScene 초기화 순서를 관리하는 영구 Scene 로더입니다.</summary>
+    public sealed class SceneLoadManager : PersistentMonoSingleton<SceneLoadManager>
     {
         [SerializeField] private InterfaceReference<ISceneTransition> transition;
 
-        private BaseScene curScene;
+        /// <summary>현재 등록된 BaseScene입니다. Scene에 BaseScene이 없으면 null입니다.</summary>
+        public BaseScene CurrentScene { get; private set; }
+        /// <summary>Scene 전환 작업이 진행 중인지 나타냅니다.</summary>
+        public bool IsLoading { get; private set; }
 
-        public void RegisterScene(BaseScene scene)
+        /// <summary>현재 Scene을 원하는 BaseScene 파생 타입으로 반환합니다.</summary>
+        public T GetCurrentScene<T>() where T : BaseScene => CurrentScene as T;
+
+        public T GetCurScene<T>() where T : BaseScene => GetCurrentScene<T>();
+
+        public BaseScene GetCurScene() => CurrentScene;
+
+        /// <summary>다음 Scene 이동에 사용할 Fade 전환 구현을 지정합니다.</summary>
+        public void SetTransition(ISceneTransition value)
         {
-            curScene = scene;
+            transition ??= new InterfaceReference<ISceneTransition>();
+            transition.Value = value;
         }
 
-        public T GetCurScene<T>() where T : BaseScene
+        internal void ClearTransition(ISceneTransition value)
         {
-            return GetCurScene() as T;
+            if (transition?.Value == value)
+                transition.Value = null;
         }
 
-        public BaseScene GetCurScene()
+        internal void RegisterScene(BaseScene scene) => CurrentScene = scene;
+
+        internal void UnregisterScene(BaseScene scene)
         {
-            return curScene;
-        }
-
-        public void SetTransition(ISceneTransition transition)
-        {
-            if (this.transition != null)
-            {
-                Destroy(this.transition.Value.Go);
-            }
-
-            if (this.transition == null)
-                this.transition = new InterfaceReference<ISceneTransition>();
-
-            this.transition.Value = transition;
+            if (CurrentScene == scene)
+                CurrentScene = null;
         }
 
 #if UNITASK_INSTALLED
-        public async UniTask LoadScene(Enum sceneType, LoadSceneMode loadMode = LoadSceneMode.Single)
+        /// <summary>Enum 이름과 같은 Scene을 비동기로 불러옵니다.</summary>
+        public UniTask LoadScene(Enum scene, LoadSceneMode mode = LoadSceneMode.Single)
         {
-            if (transition is { Value: not null })
-                await transition.Value.OnFadeIn();
+            if (scene == null)
+                throw new ArgumentNullException(nameof(scene));
 
-            await LoadSceneAsync(sceneType.ToString(), loadMode);
-            await InitializeScene();
-
-            if (transition is { Value: not null })
-                await transition.Value.OnFadeOut();
-
-            curScene.OnAfterInit();
+            return LoadScene(scene.ToString(), mode);
         }
 
-
-        private async UniTask LoadSceneAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single)
+        /// <summary>FadeOut, Scene Load, BaseScene 초기화, FadeIn 순서로 Scene을 전환합니다.</summary>
+        public async UniTask LoadScene(string sceneName, LoadSceneMode mode = LoadSceneMode.Single)
         {
-            var op = SceneManager.LoadSceneAsync(sceneName, loadMode);
-            op.allowSceneActivation = false;
+            if (string.IsNullOrWhiteSpace(sceneName))
+                throw new ArgumentException("Scene name cannot be empty.", nameof(sceneName));
+            if (IsLoading)
+                throw new InvalidOperationException("A scene is already loading.");
 
-            var progress = transition as IProgress<float>;
-            while (op.progress < 0.9f)
+            IsLoading = true;
+            ISceneTransition activeTransition = transition?.Value;
+            try
             {
-                progress?.Report(op.progress / 0.9f);
+                if (activeTransition != null)
+                    await activeTransition.OnFadeOut();
 
+                CurrentScene = null;
+                await LoadSceneAsync(sceneName, mode, activeTransition as IProgress<float>);
+
+                BaseScene loadedScene = CurrentScene;
+                if (loadedScene == null)
+                {
+                    CDebug.LogError(
+                        $"Scene '{sceneName}' has no BaseScene component. Scene initialization was skipped.");
+                }
+                else
+                {
+                    await loadedScene.OnInit();
+                }
+
+                if (activeTransition != null)
+                    await activeTransition.OnFadeIn();
+
+                loadedScene?.OnAfterInit();
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private static async UniTask LoadSceneAsync(
+            string sceneName,
+            LoadSceneMode mode,
+            IProgress<float> progress)
+        {
+            AsyncOperation operation = SceneManager.LoadSceneAsync(sceneName, mode);
+            if (operation == null)
+                throw new InvalidOperationException($"Could not start loading scene '{sceneName}'.");
+
+            operation.allowSceneActivation = false;
+            while (operation.progress < 0.9f)
+            {
+                progress?.Report(operation.progress / 0.9f);
                 await UniTask.Yield();
             }
 
             progress?.Report(1f);
-            op.allowSceneActivation = true;
-
-            await UniTask.WaitUntil(() => op.isDone);
-        }
-
-        private async UniTask InitializeScene()
-        {
-            if (curScene == null)
-            {
-                CDebug.LogError("Current Scene is null. Make sure the scene has a BaseScene derived object.");
-                return;
-            }
-
-            await curScene.OnInit();
+            operation.allowSceneActivation = true;
+            await UniTask.WaitUntil(() => operation.isDone);
         }
 #endif
     }

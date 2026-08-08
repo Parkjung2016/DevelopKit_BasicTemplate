@@ -1,36 +1,52 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
-    public class TimerManager : Singleton<TimerManager>
+    internal sealed class TimerManager : Singleton<TimerManager>
     {
         private readonly List<Timer> timers = new();
-        private readonly List<Timer> sweep = new();
+        private readonly List<Timer> updateBuffer = new();
 
-        public void RegisterTimer(Timer timer) => timers.Add(timer);
-        public void DeregisterTimer(Timer timer) => timers.Remove(timer);
-
-        public void UpdateTimers()
+        public TimerManager()
         {
-            if (timers.Count == 0) return;
-
-            sweep.RefreshWith(timers);
-            foreach (var timer in sweep)
-            {
-                timer.Tick();
-            }
         }
 
-        public void Clear()
+        internal void Register(Timer timer)
         {
-            sweep.RefreshWith(timers);
-            foreach (var timer in sweep)
-            {
-                timer.Dispose();
-            }
+            if (timer != null && !timers.Contains(timer))
+                timers.Add(timer);
+        }
+
+        internal void Unregister(Timer timer)
+        {
+            if (timer != null)
+                timers.Remove(timer);
+        }
+
+        internal void UpdateTimers()
+        {
+            if (timers.Count == 0)
+                return;
+
+            updateBuffer.Clear();
+            updateBuffer.AddRange(timers);
+
+            float deltaTime = Time.deltaTime;
+            for (int i = 0; i < updateBuffer.Count; i++)
+                updateBuffer[i].Update(deltaTime);
+        }
+
+        internal void Clear()
+        {
+            updateBuffer.Clear();
+            updateBuffer.AddRange(timers);
+
+            for (int i = 0; i < updateBuffer.Count; i++)
+                updateBuffer[i].Dispose();
 
             timers.Clear();
-            sweep.Clear();
+            updateBuffer.Clear();
         }
     }
 }

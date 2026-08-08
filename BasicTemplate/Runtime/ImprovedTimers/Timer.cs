@@ -1,85 +1,127 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
+    /// <summary>PlayerLoop에서 갱신되는 타이머의 공통 수명주기를 제공합니다.</summary>
     public abstract class Timer : IDisposable
     {
-        public float CurrentTime { get; protected set; }
-        public bool IsRunning { get; private set; }
+        private bool isRegistered;
+        private bool isDisposed;
 
-        protected float initialTime;
-
-        public float Progress => Mathf.Clamp(CurrentTime / initialTime, 0, 1);
-
-        public Action OnTimerStart = delegate { };
-        public Action OnTimerStop = delegate { };
-
-        protected Timer(float value)
+        protected Timer(float duration)
         {
-            initialTime = value;
+            SetDuration(duration);
+            Reset();
         }
+
+        public float CurrentTime { get; protected set; }
+        public float Duration { get; private set; }
+        public bool IsRunning { get; private set; }
+        public bool IsPaused { get; private set; }
+        public float Progress => Duration > 0f ? Mathf.Clamp01(CurrentTime / Duration) : 0f;
+
+        public event Action Started;
+        public event Action Stopped;
 
         public void Start()
         {
-            CurrentTime = initialTime;
-            if (!IsRunning)
+            ThrowIfDisposed();
+            Reset();
+
+            if (!isRegistered)
             {
-                IsRunning = true;
-                TimerManager.Instance.RegisterTimer(this);
-                OnTimerStart.Invoke();
+                TimerManager.Instance.Register(this);
+                isRegistered = true;
             }
+
+            IsRunning = true;
+            IsPaused = false;
+            Started?.Invoke();
         }
 
         public void Stop()
         {
-            if (IsRunning)
-            {
-                IsRunning = false;
-                TimerManager.Instance.DeregisterTimer(this);
-                OnTimerStop.Invoke();
-            }
+            if (!isRegistered)
+                return;
+
+            TimerManager.Instance.Unregister(this);
+            isRegistered = false;
+            IsRunning = false;
+            IsPaused = false;
+            Stopped?.Invoke();
         }
 
-        public abstract void Tick();
-        public abstract bool IsFinished { get; }
-
-        public void Resume() => IsRunning = true;
-        public void Pause() => IsRunning = false;
-
-        public virtual void Reset() => CurrentTime = initialTime;
-
-        public virtual void Reset(float newTime)
+        public void Pause()
         {
-            initialTime = newTime;
+            if (!IsRunning)
+                return;
+
+            IsRunning = false;
+            IsPaused = true;
+        }
+
+        public void Resume()
+        {
+            ThrowIfDisposed();
+            if (!IsPaused)
+                return;
+
+            IsRunning = true;
+            IsPaused = false;
+        }
+
+        public virtual void Reset()
+        {
+            CurrentTime = Duration;
+        }
+
+        public virtual void Reset(float duration)
+        {
+            SetDuration(duration);
             Reset();
         }
 
-        bool disposed;
-
-        ~Timer()
+        internal void Update(float deltaTime)
         {
-            Dispose(false);
+            if (IsRunning)
+                OnTick(Mathf.Max(0f, deltaTime));
         }
 
-        // Call Dispose to ensure deregistration of the timer from the TimerManager
-        // when the consumer is done with the timer or being destroyed
+        protected abstract void OnTick(float deltaTime);
+
+        protected void Complete()
+        {
+            Stop();
+        }
+
         public void Dispose()
         {
-            Dispose(true);
+            if (isDisposed)
+                return;
+
+            if (isRegistered)
+                TimerManager.Instance.Unregister(this);
+
+            isRegistered = false;
+            IsRunning = false;
+            IsPaused = false;
+            isDisposed = true;
             GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(bool disposing)
+        private void SetDuration(float duration)
         {
-            if (disposed) return;
+            if (duration < 0f)
+                throw new ArgumentOutOfRangeException(nameof(duration), "Duration cannot be negative.");
 
-            if (disposing)
-            {
-                TimerManager.Instance.DeregisterTimer(this);
-            }
+            Duration = duration;
+        }
 
-            disposed = true;
+        private void ThrowIfDisposed()
+        {
+            if (isDisposed)
+                throw new ObjectDisposedException(GetType().Name);
         }
     }
 }

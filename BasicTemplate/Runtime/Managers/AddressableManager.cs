@@ -80,7 +80,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             GameObject prefabInstantiate = usePool
                 ? PrefabPool.Spawn(prefab, parent)
                 : Object.Instantiate(prefab, parent);
-            T comp = prefabInstantiate.GetOrAdd<T>();
+            T comp = prefabInstantiate.GetOrAddComponent<T>();
             comp.gameObject.name = prefab.name;
             return comp;
         }
@@ -153,7 +153,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
                 async ct =>
                 {
                     GameObject instance = await InstantiateInternalAsync(key, parent, usePool, ct);
-                    return instance != null ? instance.GetOrAdd<T>() : null;
+                    return instance != null ? instance.GetOrAddComponent<T>() : null;
                 },
                 static result => result != null);
 

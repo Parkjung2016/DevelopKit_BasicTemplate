@@ -1,47 +1,44 @@
-using System;
-using UnityEngine;
+﻿using System;
 
-namespace PJDev.DevelopKit.BasicTemplate.Runtime {
-    /// <summary>
-    /// 초당 N번 실행되도록 설정된 타이머.
-    /// </summary>
+namespace PJDev.DevelopKit.BasicTemplate.Runtime
+{
+    /// <summary>초당 지정한 횟수만큼 이벤트를 실행합니다.</summary>
+    public sealed class FrequencyTimer : Timer
+    {
+        private float interval;
 
-    public class FrequencyTimer : Timer {
+        public FrequencyTimer(int ticksPerSecond) : base(0f)
+        {
+            SetFrequency(ticksPerSecond);
+        }
+
         public int TicksPerSecond { get; private set; }
-        
-        public Action OnTick = delegate { };
-        
-        float timeThreshold;
+        public bool IsFinished => !IsRunning && !IsPaused;
+        public event Action Ticked;
 
-        public FrequencyTimer(int ticksPerSecond) : base(0) {
-            CalculateTimeThreshold(ticksPerSecond);
-        }
-
-        public override void Tick() {
-            if (IsRunning && CurrentTime >= timeThreshold) {
-                CurrentTime -= timeThreshold;
-                OnTick.Invoke();
-            }
-
-            if (IsRunning && CurrentTime < timeThreshold) {
-                CurrentTime += Time.deltaTime;
+        protected override void OnTick(float deltaTime)
+        {
+            CurrentTime += deltaTime;
+            while (CurrentTime >= interval)
+            {
+                CurrentTime -= interval;
+                Ticked?.Invoke();
             }
         }
 
-        public override bool IsFinished => !IsRunning;
+        public override void Reset()
+        {
+            CurrentTime = 0f;
+        }
 
-        public override void Reset() {
-            CurrentTime = 0;
-        }
-        
-        public void Reset(int newTicksPerSecond) {
-            CalculateTimeThreshold(newTicksPerSecond);
-            Reset();
-        }
-        
-        void CalculateTimeThreshold(int ticksPerSecond) {
+        public void SetFrequency(int ticksPerSecond)
+        {
+            if (ticksPerSecond <= 0)
+                throw new ArgumentOutOfRangeException(nameof(ticksPerSecond), "Ticks per second must be greater than zero.");
+
             TicksPerSecond = ticksPerSecond;
-            timeThreshold = 1f / TicksPerSecond;
+            interval = 1f / ticksPerSecond;
+            Reset();
         }
     }
 }

@@ -1,84 +1,65 @@
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using Random = System.Random;
-#if UNITY_6000_5_OR_NEWER
-using Unity.Scripting.LifecycleManagement;
-#endif
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
-    public static partial class ListExtensions
+    /// <summary>컬렉션의 상태 확인과 내용 교체에 사용하는 기본 확장 메서드입니다.</summary>
+    public static class ListExtensions
     {
-#if UNITY_6000_5_OR_NEWER
-        [AutoStaticsCleanup]
-#else
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void ResetStatics()
-        {
-            rnd = null;
-        }
-#endif
-        private static Random rnd;
+        /// <summary>컬렉션이 null이거나 항목이 없는지 확인합니다.</summary>
+        public static bool IsNullOrEmpty<T>(this ICollection<T> collection) =>
+            collection == null || collection.Count == 0;
 
-        /// <summary>
-        /// 컬렉션이 null이거나 요소가 하나도 없는지 확인합니다.
-        /// 컬렉션 전체를 열거하여 개수를 세지 않고 판단합니다.
-        /// </summary>
-        /// <param name="list">검사할 리스트입니다.</param>
-        public static bool IsNullOrEmpty<T>(this IList<T> list)
+        /// <summary>열거 가능한 항목을 새 List로 복사합니다.</summary>
+        public static List<T> Clone<T>(this IEnumerable<T> source)
         {
-            return list == null || list.Count <= 0;
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+
+            return new List<T>(source);
         }
 
-        /// <summary>
-        /// 원본 리스트의 복사본인 새 리스트를 생성합니다.
-        /// </summary>
-        /// <param name="list">복사할 원본 리스트입니다.</param>
-        /// <returns>원본 리스트를 복사한 새 리스트를 반환합니다.</returns>
-        public static List<T> Clone<T>(this IList<T> list)
+        /// <summary>두 인덱스의 항목을 서로 교환합니다.</summary>
+        public static void Swap<T>(this IList<T> list, int firstIndex, int secondIndex)
         {
-            return list.ToList();
+            if (list == null)
+                throw new ArgumentNullException(nameof(list));
+            if (firstIndex == secondIndex)
+                return;
+
+            (list[firstIndex], list[secondIndex]) = (list[secondIndex], list[firstIndex]);
         }
 
-        /// <summary>
-        /// 리스트 내에서 지정한 두 인덱스의 요소를 서로 교환합니다.
-        /// </summary>
-        /// <param name="list">대상 리스트입니다.</param>
-        /// <param name="indexA">첫 번째 요소의 인덱스입니다.</param>
-        /// <param name="indexB">두 번째 요소의 인덱스입니다.</param>
-        public static void Swap<T>(this IList<T> list, int indexA, int indexB)
+        /// <summary>기존 List 인스턴스는 유지하고 내용을 새 항목으로 교체합니다.</summary>
+        public static void ReplaceWith<T>(this List<T> list, IEnumerable<T> items)
         {
-            (list[indexA], list[indexB]) = (list[indexB], list[indexA]);
+            if (list == null)
+                throw new ArgumentNullException(nameof(list));
+            if (items == null)
+                throw new ArgumentNullException(nameof(items));
+
+            list.Clear();
+            list.AddRange(items);
         }
 
-        /// <summary>
-        /// Fisher-Yates 알고리즘의 Durstenfeld 구현을 사용하여 리스트 요소를 섞습니다.
-        /// 이 메서드는 입력 리스트를 직접 수정하며, 모든 순열이 동일한 확률로 발생합니다.
-        /// 메서드 체이닝을 위해 섞인 리스트를 반환합니다.
-        /// 참고: http://en.wikipedia.org/wiki/Fisher-Yates_shuffle
-        /// </summary>
-        /// <param name="list">섞을 리스트입니다.</param>
-        /// <typeparam name="T">리스트 요소 타입입니다.</typeparam>
-        /// <returns>섞인 리스트를 반환합니다.</returns>
+        /// <summary>기존 이름을 사용하는 코드에서 List 내용을 새 항목으로 교체합니다.</summary>
+        public static void RefreshWith<T>(this List<T> list, IEnumerable<T> items) =>
+            list.ReplaceWith(items);
+
+        /// <summary>Fisher-Yates 방식으로 List의 항목 순서를 섞습니다.</summary>
         public static IList<T> Shuffle<T>(this IList<T> list)
         {
-            if (rnd == null) rnd = new Random();
-            int count = list.Count;
-            while (count > 1)
+            if (list == null)
+                throw new ArgumentNullException(nameof(list));
+
+            for (int remaining = list.Count; remaining > 1; remaining--)
             {
-                --count;
-                int index = rnd.Next(count + 1);
-                (list[index], list[count]) = (list[count], list[index]);
+                int index = UnityEngine.Random.Range(0, remaining);
+                int last = remaining - 1;
+                (list[index], list[last]) = (list[last], list[index]);
             }
 
             return list;
-        }
-
-        public static void RefreshWith<T>(this List<T> list, IEnumerable<T> items)
-        {
-            list.Clear();
-            list.AddRange(items);
         }
     }
 }

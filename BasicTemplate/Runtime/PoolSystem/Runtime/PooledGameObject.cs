@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime.PoolSystem
@@ -51,20 +52,23 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime.PoolSystem
 
         private void CacheCallbacks()
         {
-            MonoBehaviour[] behaviours = GetComponentsInChildren<MonoBehaviour>(true);
-            int count = 0;
-            for (int i = 0; i < behaviours.Length; i++)
+            using (ListPool<MonoBehaviour>.Rent(out List<MonoBehaviour> behaviours))
             {
-                if (behaviours[i] is IPoolable)
-                    count++;
-            }
+                GetComponentsInChildren(true, behaviours);
+                int count = 0;
+                for (int i = 0; i < behaviours.Count; i++)
+                {
+                    if (behaviours[i] is IPoolable)
+                        count++;
+                }
 
-            callbacks = count == 0 ? Array.Empty<IPoolable>() : new IPoolable[count];
-            int callbackIndex = 0;
-            for (int i = 0; i < behaviours.Length; i++)
-            {
-                if (behaviours[i] is IPoolable poolable)
-                    callbacks[callbackIndex++] = poolable;
+                callbacks = count == 0 ? Array.Empty<IPoolable>() : new IPoolable[count];
+                int callbackIndex = 0;
+                for (int i = 0; i < behaviours.Count; i++)
+                {
+                    if (behaviours[i] is IPoolable poolable)
+                        callbacks[callbackIndex++] = poolable;
+                }
             }
         }
 

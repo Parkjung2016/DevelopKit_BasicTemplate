@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,40 +11,45 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
         public TValue Value;
     }
 
-    [System.Serializable]
+    /// <summary>Unity 직렬화를 지원하는 Dictionary입니다.</summary>
+    [Serializable]
     public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver
     {
-        [SerializeField] private List<SerializableKeyValue<TKey, TValue>> _keyValueList = new List<SerializableKeyValue<TKey, TValue>>();
+        [SerializeField]
+        private List<SerializableKeyValue<TKey, TValue>> _keyValueList = new();
 
         public void OnBeforeSerialize()
         {
-            if (_keyValueList == null) return;
-            if (this.Count < _keyValueList.Count)
-            {
-                return;
-            }
-
+            _keyValueList ??= new List<SerializableKeyValue<TKey, TValue>>(Count);
             _keyValueList.Clear();
 
-            foreach (var kv in this)
+            foreach (KeyValuePair<TKey, TValue> pair in this)
             {
-                _keyValueList.Add(new SerializableKeyValue<TKey, TValue>()
+                _keyValueList.Add(new SerializableKeyValue<TKey, TValue>
                 {
-                    Key = kv.Key,
-                    Value = kv.Value
+                    Key = pair.Key,
+                    Value = pair.Value
                 });
             }
         }
 
         public void OnAfterDeserialize()
         {
-            this.Clear();
-            foreach (var kv in _keyValueList)
+            Clear();
+            if (_keyValueList == null)
+                return;
+
+            for (int i = 0; i < _keyValueList.Count; i++)
             {
-                if (!this.TryAdd(kv.Key, kv.Value))
+                SerializableKeyValue<TKey, TValue> pair = _keyValueList[i];
+                if (pair == null)
                 {
-                    Debug.LogError($"List has duplicate Key");
+                    Debug.LogWarning("SerializableDictionary에서 비어 있는 항목을 건너뛰었습니다.");
+                    continue;
                 }
+
+                if (!TryAdd(pair.Key, pair.Value))
+                    Debug.LogWarning($"SerializableDictionary에서 중복 키를 건너뛰었습니다: {pair.Key}");
             }
         }
     }

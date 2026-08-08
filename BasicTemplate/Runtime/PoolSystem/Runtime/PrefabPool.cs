@@ -84,8 +84,11 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime.PoolSystem
                    marker.Owner.Return(instance);
         }
 
-        public static bool IsPooled(GameObject instance) =>
-            GameObjectPool.FindMarker(instance) != null;
+        public static bool IsPooled(GameObject instance)
+        {
+            PooledGameObject marker = GameObjectPool.FindMarker(instance);
+            return marker != null && marker.Owner != null && !marker.Owner.IsDisposed;
+        }
 
         public static bool Remove(GameObject prefab)
         {

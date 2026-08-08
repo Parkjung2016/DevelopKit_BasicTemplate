@@ -1,18 +1,22 @@
-using UnityEngine;
-
-namespace PJDev.DevelopKit.BasicTemplate.Runtime {
-    /// <summary>
-    /// 경과 시간 측정을 위한 증가형 타이머.
-    /// </summary>
-    public class StopwatchTimer : Timer {
-        public StopwatchTimer() : base(0) { }
-
-        public override void Tick() {
-            if (IsRunning) {
-                CurrentTime += Time.deltaTime;
-            }
+﻿namespace PJDev.DevelopKit.BasicTemplate.Runtime
+{
+    /// <summary>경과 시간을 누적하는 타이머입니다.</summary>
+    public sealed class StopwatchTimer : Timer
+    {
+        public StopwatchTimer() : base(0f)
+        {
         }
 
-        public override bool IsFinished => false;
+        public bool IsFinished => false;
+
+        protected override void OnTick(float deltaTime)
+        {
+            CurrentTime += deltaTime;
+        }
+
+        public override void Reset()
+        {
+            CurrentTime = 0f;
+        }
     }
 }

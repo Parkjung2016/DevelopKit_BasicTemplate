@@ -1,60 +1,56 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 #if UNITY_6000_5_OR_NEWER
 using Unity.Scripting.LifecycleManagement;
 #endif
-using UnityEngine;
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
+    /// <summary>자주 사용하는 코루틴 대기 객체를 재사용합니다.</summary>
 #if UNITY_6000_5_OR_NEWER
     [AutoStaticsCleanup]
 #endif
     public static partial class WaitFor
     {
-#if UNITY_6000_5_OR_NEWER
-        [NoAutoStaticsCleanup]
-#endif
-        public static WaitForFixedUpdate FixedUpdate { get; } = new WaitForFixedUpdate();
+        private const int MaxCachedDurations = 128;
+        private static readonly Dictionary<float, WaitForSeconds> SecondsCache = new();
 
 #if UNITY_6000_5_OR_NEWER
         [NoAutoStaticsCleanup]
 #endif
-        public static WaitForEndOfFrame EndOfFrame { get; } = new WaitForEndOfFrame();
+        public static WaitForFixedUpdate FixedUpdate { get; } = new();
 
-        private static readonly Dictionary<float, WaitForSeconds> waitForSecondsDic =
-            new Dictionary<float, WaitForSeconds>(100, new FloatComparer());
+#if UNITY_6000_5_OR_NEWER
+        [NoAutoStaticsCleanup]
+#endif
+        public static WaitForEndOfFrame EndOfFrame { get; } = new();
 
-        private static readonly Dictionary<float, WaitForSecondsRealtime> waitForSecondsRealtimeDic =
-            new Dictionary<float, WaitForSecondsRealtime>(100, new FloatComparer());
-
+        /// <summary>게임 시간 기준으로 기다립니다. 0 이하는 다음 프레임까지 기다립니다.</summary>
         public static WaitForSeconds Seconds(float seconds)
         {
-            if (seconds < 1f / Application.targetFrameRate) return null;
-            if (!waitForSecondsDic.TryGetValue(seconds, out var forSeconds))
-            {
-                forSeconds = new WaitForSeconds(seconds);
-                waitForSecondsDic[seconds] = forSeconds;
-            }
+            if (seconds <= 0f)
+                return null;
 
-            return forSeconds;
+            if (SecondsCache.TryGetValue(seconds, out WaitForSeconds cached))
+                return cached;
+
+            var wait = new WaitForSeconds(seconds);
+            if (SecondsCache.Count < MaxCachedDurations)
+                SecondsCache.Add(seconds, wait);
+
+            return wait;
         }
 
-        public static WaitForSecondsRealtime SecondsRealtime(float seconds)
-        {
-            if (seconds < 1f / Application.targetFrameRate) return null;
-            if (!waitForSecondsRealtimeDic.TryGetValue(seconds, out var forSeconds))
-            {
-                forSeconds = new WaitForSecondsRealtime(seconds);
-                waitForSecondsRealtimeDic[seconds] = forSeconds;
-            }
+        /// <summary>
+        /// 실제 시간 기준으로 기다립니다. WaitForSecondsRealtime은 실행 상태를 가지므로 호출할 때마다 새로 만듭니다.
+        /// </summary>
+        public static WaitForSecondsRealtime SecondsRealtime(float seconds) =>
+            new(Mathf.Max(0f, seconds));
 
-            return forSeconds;
-        }
-
-        class FloatComparer : IEqualityComparer<float>
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ClearCache()
         {
-            public bool Equals(float x, float y) => Mathf.Abs(x - y) <= Mathf.Epsilon;
-            public int GetHashCode(float obj) => obj.GetHashCode();
+            SecondsCache.Clear();
         }
     }
 }

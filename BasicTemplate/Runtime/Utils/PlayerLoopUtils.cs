@@ -1,10 +1,10 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.LowLevel;
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime {
-    public static class PlayerLoopUtils {
+    internal static class PlayerLoopUtils {
         // Remove a system from the player loop
         public static void RemoveSystem<T>(ref PlayerLoopSystem loop, in PlayerLoopSystem systemToRemove) {
             if (loop.subSystemList == null) return;

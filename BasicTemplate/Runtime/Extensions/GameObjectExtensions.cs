@@ -1,176 +1,106 @@
-using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     public static class GameObjectExtensions
     {
-        /// <summary>
-        /// GameObject의 레이어가 지정한 LayerMask에 포함되어 있는지 확인합니다.
-        /// </summary>
-        /// <param name="gameObject">레이어를 확인할 GameObject입니다.</param>
-        /// <param name="mask">비교할 LayerMask입니다.</param>
-        /// <returns>
-        /// GameObject의 레이어가 LayerMask에 포함되어 있으면 true를,
-        /// 그렇지 않으면 false를 반환합니다.
-        /// </returns>
-        /// <example>
-        /// <code>
-        /// if (target.IsInLayerMask(attackableMask)) {
-        ///     Attack(target);
-        /// }
-        /// </code>
-        /// </example>
-        public static bool IsInLayerMask(this GameObject gameObject, LayerMask mask) {
-            return (mask.value & (1 << gameObject.layer)) != 0;
-        }
-        
-        /// <summary>
-        /// GameObject를 Hierarchy 창에서 숨깁니다.
-        /// </summary>
-        /// <param name="gameObject"></param>
+        public static bool IsInLayerMask(this GameObject gameObject, LayerMask mask) =>
+            gameObject != null && (mask.value & (1 << gameObject.layer)) != 0;
+
         public static void HideInHierarchy(this GameObject gameObject)
         {
-            gameObject.hideFlags = HideFlags.HideInHierarchy;
+            if (gameObject != null)
+                gameObject.hideFlags = HideFlags.HideInHierarchy;
         }
 
-        /// <summary>
-        /// GameObject에 지정된 타입의 컴포넌트를 가져옵니다. 해당 타입의 컴포넌트가 없으면 새로 추가합니다.
-        /// </summary>
-        /// <remarks>
-        /// GameObject에 특정 타입의 컴포넌트가 있는지 확실하지 않을 때 유용합니다.
-        /// 컴포넌트를 수동으로 확인하고 추가하는 대신, 이 메서드를 사용하면 한 줄로 둘 다 처리할 수 있습니다.
-        /// </remarks>
-        /// <typeparam name="T">가져오거나 추가할 컴포넌트의 타입입니다.</typeparam>
-        /// <param name="gameObject">컴포넌트를 가져오거나 추가할 대상 GameObject입니다.</param>
-        /// <returns>이미 존재하는 컴포넌트가 있다면 그 컴포넌트를, 없다면 새로 추가한 컴포넌트를 반환합니다.</returns>
-        public static T GetOrAdd<T>(this GameObject gameObject) where T : Component
-        {
-            T component = gameObject.GetComponent<T>();
-            if (!component) component = gameObject.AddComponent<T>();
+        /// <summary>컴포넌트가 있으면 반환하고, 없으면 추가합니다.</summary>
+        public static T GetOrAdd<T>(this GameObject gameObject) where T : Component =>
+            gameObject.GetOrAddComponent<T>();
 
-            return component;
-        }
+        /// <summary>파괴된 Unity Object를 실제 null로 변환합니다.</summary>
+        public static T OrNull<T>(this T value) where T : Object => value ? value : null;
 
-        /// <summary>
-        /// 객체가 존재하면 자기 자신을 반환하고, 그렇지 않으면 null을 반환합니다.
-        /// </summary>
-        /// <remarks>
-        /// 이 메서드는 null 참조와 Unity에서 파괴된 객체를 구분하는 데 도움이 됩니다.
-        /// Unity의 "== null" 비교는 파괴된 객체에 대해서도 true를 반환할 수 있어, 오동작을 일으킬 수 있습니다.
-        /// OrNull 메서드는 Unity의 null 체크 방식을 사용하며, 객체가 파괴된 상태라면 실제 null을 반환하여
-        /// 연산을 안전하게 이어가고 NullReferenceException을 방지할 수 있도록 합니다.
-        /// </remarks>
-        /// <typeparam name="T">체크할 객체의 타입입니다.</typeparam>
-        /// <param name="obj">확인할 객체입니다.</param>
-        /// <returns>객체가 존재하고 파괴되지 않았다면 자기 자신을, 그렇지 않으면 null을 반환합니다.</returns>
-        public static T OrNull<T>(this T obj) where T : Object => obj ? obj : null;
-
-        /// <summary>
-        /// GameObject의 모든 자식 오브젝트를 삭제합니다.
-        /// </summary>
-        /// <param name="gameObject">GameObject whose children are to be destroyed.</param>
         public static void DestroyChildren(this GameObject gameObject)
         {
-            gameObject.transform.DestroyChildren();
+            if (gameObject != null)
+                gameObject.transform.DestroyChildren();
         }
 
-        /// <summary>
-        /// GameObject의 모든 자식 오브젝트를 즉시 삭제합니다.
-        /// </summary>
-        /// <param name="gameObject">GameObject whose children are to be destroyed.</param>
         public static void DestroyChildrenImmediate(this GameObject gameObject)
         {
-            gameObject.transform.DestroyChildrenImmediate();
+            if (gameObject != null)
+                gameObject.transform.DestroyChildrenImmediate();
         }
 
-        /// <summary>
-        /// GameObject의 모든 자식 오브젝트를 활성화합니다.
-        /// </summary>
-        /// <param name="gameObject">GameObject whose child GameObjects are to be enabled.</param>
         public static void EnableChildren(this GameObject gameObject)
         {
-            gameObject.transform.EnableChildren();
+            if (gameObject != null)
+                gameObject.transform.EnableChildren();
         }
 
-        /// <summary>
-        /// GameObject의 모든 자식 오브젝트를 비활성화합니다.
-        /// </summary>
-        /// <param name="gameObject">GameObject whose child GameObjects are to be disabled.</param>
         public static void DisableChildren(this GameObject gameObject)
         {
-            gameObject.transform.DisableChildren();
+            if (gameObject != null)
+                gameObject.transform.DisableChildren();
         }
 
-        /// <summary>
-        /// GameObject의 Transform의 위치, 회전, 스케일을 로컬 좌표계를 기준으로 초기화합니다.
-        /// </summary>
-        /// <param name="gameObject">Transform을 초기화할 GameObject입니다.</param>
+        /// <summary>로컬 위치와 회전, 크기를 기본값으로 되돌립니다.</summary>
         public static void ResetTransformation(this GameObject gameObject)
         {
-            gameObject.transform.Reset();
+            if (gameObject != null)
+                gameObject.transform.Reset();
         }
 
-        /// <summary>
-        /// 이 GameObject의 Unity 씬 계층 내 경로를 반환합니다.
-        /// </summary>
-        /// <param name="gameObject">경로를 구할 대상 GameObject입니다.</param>
-        /// <returns>
-        /// 이 GameObject의 전체 계층 경로를 나타내는 문자열을 반환합니다.
-        /// 각 계층 이름은 '/'로 구분되며, 최상위 부모부터 시작하여 지정된 GameObject의 **부모까지**의 이름으로 구성됩니다.
-        /// </returns>
+        /// <summary>루트부터 현재 GameObject까지의 Hierarchy 경로를 반환합니다.</summary>
         public static string Path(this GameObject gameObject)
         {
-            return "/" + string.Join("/",
-                gameObject.GetComponentsInParent<Transform>().Select(t => t.name).Reverse().ToArray());
+            if (gameObject == null)
+                return string.Empty;
+
+            int depth = 0;
+            for (Transform item = gameObject.transform; item != null; item = item.parent)
+                depth++;
+
+            var names = new string[depth];
+            int index = depth - 1;
+            for (Transform item = gameObject.transform; item != null; item = item.parent)
+                names[index--] = item.name;
+
+            return "/" + string.Join("/", names);
         }
 
-        /// <summary>
-        /// 이 GameObject의 Unity 씬 계층 구조에서 전체 경로를 반환합니다.
-        /// </summary>
-        /// <param name="gameObject">경로를 얻을 대상 GameObject입니다.</param>
-        /// <returns>
-        /// 이 GameObject의 전체 계층 경로를 나타내는 문자열을 반환합니다.
-        /// '/'로 구분된 문자열이며, 각 부분은 루트 부모부터 시작해서 지정된 GameObject 자체 이름으로 끝납니다.
-        /// </returns>
-        public static string PathFull(this GameObject gameObject)
-        {
-            return gameObject.Path() + "/" + gameObject.name;
-        }
+        /// <summary>현재 GameObject의 전체 Hierarchy 경로를 반환합니다.</summary>
+        public static string PathFull(this GameObject gameObject) => gameObject.Path();
 
-        /// <summary>
-        /// 이 GameObject와 그 자식들 모두에 대해 지정한 레이어를 재귀적으로 설정합니다.
-        /// </summary>
-        /// <param name="gameObject">레이어를 설정할 GameObject입니다.</param>
-        /// <param name="layer">GameObject와 그 자식들에 설정할 레이어 번호입니다.</param>
-        public static void SetLayersRecursively(this GameObject gameObject, int layer)
+        public static void SetLayerRecursively(this GameObject gameObject, int layer)
         {
+            if (gameObject == null)
+                return;
+
             gameObject.layer = layer;
-            gameObject.transform.ForEveryChild(child => child.gameObject.SetLayersRecursively(layer));
+            Transform transform = gameObject.transform;
+            for (int i = 0; i < transform.childCount; i++)
+                transform.GetChild(i).gameObject.SetLayerRecursively(layer);
         }
 
-        /// <summary>
-        /// MonoBehaviour에 연결된 GameObject를 활성화하고, 해당 인스턴스를 반환합니다.
-        /// </summary>
-        /// <typeparam name="T">MonoBehaviour 타입입니다.</typeparam>
-        /// <param name="obj">활성화할 MonoBehaviour 인스턴스입니다.</param>
-        /// <returns>활성화된 MonoBehaviour 인스턴스를 반환합니다.</returns>
-        public static T SetActive<T>(this T obj) where T : MonoBehaviour
+        /// <summary>현재 GameObject와 모든 자식의 레이어를 변경합니다.</summary>
+        public static void SetLayersRecursively(this GameObject gameObject, int layer) =>
+            gameObject.SetLayerRecursively(layer);
+
+        public static T SetActive<T>(this T behaviour) where T : MonoBehaviour
         {
-            obj.gameObject.SetActive(true);
-            return obj;
+            if (behaviour != null)
+                behaviour.gameObject.SetActive(true);
+
+            return behaviour;
         }
 
-        /// <summary>
-        /// MonoBehaviour에 연결된 GameObject를 비활성화하고, 해당 인스턴스를 반환합니다.
-        /// </summary>
-        /// <typeparam name="T">MonoBehaviour 타입입니다.</typeparam>
-        /// <param name="obj">비활성화할 MonoBehaviour 인스턴스입니다.</param>
-        /// <returns>비활성화된 MonoBehaviour 인스턴스를 반환합니다.</returns>
-        public static T SetInactive<T>(this T obj) where T : MonoBehaviour
+        public static T SetInactive<T>(this T behaviour) where T : MonoBehaviour
         {
-            obj.gameObject.SetActive(false);
-            return obj;
+            if (behaviour != null)
+                behaviour.gameObject.SetActive(false);
+
+            return behaviour;
         }
     }
 }

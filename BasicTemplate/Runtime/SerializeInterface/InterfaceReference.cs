@@ -4,24 +4,41 @@ using Object = UnityEngine.Object;
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
+    /// <summary>Unity Object가 구현한 인터페이스를 Inspector에서 직렬화합니다.</summary>
     [Serializable]
-    public class InterfaceReference<TInterface, TObject> where TObject : Object where TInterface : class
+    public class InterfaceReference<TInterface, TObject>
+        where TInterface : class
+        where TObject : Object
     {
-        [SerializeField, HideInInspector] TObject underlyingValue;
+        [SerializeField, HideInInspector] private TObject underlyingValue;
+
+        public InterfaceReference()
+        {
+        }
+
+        public InterfaceReference(TObject target)
+        {
+            UnderlyingValue = target;
+        }
+
+        public InterfaceReference(TInterface value)
+        {
+            Value = value;
+        }
+
+        public bool IsAssigned => underlyingValue != null;
 
         public TInterface Value
         {
             get
             {
-                Object unityObject = underlyingValue;
-                if (unityObject == null)
+                if (underlyingValue == null)
                     return null;
 
-                if (underlyingValue is TInterface @interface)
-                    return @interface;
+                if (underlyingValue is TInterface value)
+                    return value;
 
-                throw new InvalidOperationException(
-                    $"{underlyingValue} needs to implement interface {nameof(TInterface)}.");
+                throw CreateTypeException(underlyingValue);
             }
             set
             {
@@ -31,35 +48,59 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
                     return;
                 }
 
-                if (value is TObject newValue)
-                {
-                    underlyingValue = newValue;
-                    return;
-                }
+                if (value is not TObject target)
+                    throw new ArgumentException(
+                        $"{value.GetType().Name} cannot be stored as {typeof(TObject).Name}.",
+                        nameof(value));
 
-                throw new ArgumentException($"{value} needs to be of type {typeof(TObject)}.", string.Empty);
+                Validate(target);
+                underlyingValue = target;
             }
         }
 
         public TObject UnderlyingValue
         {
             get => underlyingValue;
-            set => underlyingValue = value;
+            set
+            {
+                Validate(value);
+                underlyingValue = value;
+            }
         }
 
+        public bool TryGetValue(out TInterface value)
+        {
+            value = underlyingValue as TInterface;
+            return value != null;
+        }
+
+        public static implicit operator TInterface(InterfaceReference<TInterface, TObject> reference) =>
+            reference?.Value;
+
+        private static void Validate(TObject value)
+        {
+            if (value != null && value is not TInterface)
+                throw CreateTypeException(value);
+        }
+
+        private static InvalidOperationException CreateTypeException(Object value) =>
+            new($"{value.name} must implement {typeof(TInterface).Name}.");
+    }
+
+    [Serializable]
+    public class InterfaceReference<TInterface> : InterfaceReference<TInterface, Object>
+        where TInterface : class
+    {
         public InterfaceReference()
         {
         }
 
-        public InterfaceReference(TObject target) => underlyingValue = target;
+        public InterfaceReference(Object target) : base(target)
+        {
+        }
 
-        public InterfaceReference(TInterface @interface) => underlyingValue = @interface as TObject;
-
-        public static implicit operator TInterface(InterfaceReference<TInterface, TObject> obj) => obj.Value;
-    }
-
-    [Serializable]
-    public class InterfaceReference<TInterface> : InterfaceReference<TInterface, Object> where TInterface : class
-    {
+        public InterfaceReference(TInterface value) : base(value)
+        {
+        }
     }
 }

@@ -1,14 +1,11 @@
-using UnityEngine;
+﻿using UnityEngine;
 #if UNITY_6000_5_OR_NEWER
 using Unity.Scripting.LifecycleManagement;
 #endif
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
-    /// <summary>
-    /// 기본적인 싱글톤 - 씬 전환 시 파괴됩니다.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <summary>현재 씬에서 하나만 유지되는 MonoBehaviour입니다.</summary>
 #if UNITY_6000_5_OR_NEWER
     [AutoStaticsCleanup]
 #endif
@@ -21,29 +18,52 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             get
             {
                 if (instance == null)
-                {
-                    instance = FindAnyObjectByType<T>();
-                    if (instance == null)
-                    {
-                        var go = new GameObject(typeof(T).Name + " Auto-Generated");
-                        instance = go.AddComponent<T>();
-                    }
-                }
+                    instance = FindOrCreate();
 
                 return instance;
             }
         }
 
-        protected virtual void Awake()
+        public static bool HasInstance => instance != null;
+
+        public static bool TryGetInstance(out T value)
         {
-            InitializeSingleton();
+            if (instance == null)
+                instance = FindAnyObjectByType<T>(FindObjectsInactive.Include);
+
+            value = instance;
+            return value != null;
         }
 
-        protected void InitializeSingleton()
+        protected virtual void Awake()
         {
-            if (!Application.isPlaying) return;
+            if (!Application.isPlaying)
+                return;
 
-            instance = this as T;
+            T current = this as T;
+            if (instance != null && instance != current)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            instance = current;
+        }
+
+        protected virtual void OnDestroy()
+        {
+            if (instance == this)
+                instance = null;
+        }
+
+        private static T FindOrCreate()
+        {
+            T found = FindAnyObjectByType<T>(FindObjectsInactive.Include);
+            if (found != null)
+                return found;
+
+            var gameObject = new GameObject($"[{typeof(T).Name}]");
+            return gameObject.AddComponent<T>();
         }
     }
 }

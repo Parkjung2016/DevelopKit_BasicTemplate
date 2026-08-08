@@ -1,0 +1,22 @@
+﻿{
+    "name": "PJDev.DevelopKit.BasicTemplate.Runtime.ComponentManagers.Tests",
+    "rootNamespace": "PJDev.DevelopKit.BasicTemplate.Runtime.Tests",
+    "references": [
+        "GUID:406d82ec2f4cd104699d60414ec8fcdb"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

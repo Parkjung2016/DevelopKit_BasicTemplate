@@ -1,31 +1,23 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace PJDev.DevelopKit.BasicTemplate.Runtime
 {
     public static class EnumerableExtensions
     {
-        /// <summary>
-        /// IEnumerable의 각 요소에 접근합니다.
-        /// </summary>
-        /// <typeparam name="T">IEnumerable의 요소 타입입니다.</typeparam>
-        /// <param name="sequence">순회할 IEnumerable입니다.</param>
-        /// <param name="action">>각 요소를 인자로 받아 실행할 메서드 또는 람다식입니다.</param>
+        /// <summary>모든 항목에 action을 실행합니다.</summary>
         public static void ForEach<T>(this IEnumerable<T> sequence, Action<T> action)
         {
-            foreach (var item in sequence)
-            {
+            if (sequence == null)
+                throw new ArgumentNullException(nameof(sequence));
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+
+            foreach (T item in sequence)
                 action(item);
-            }
         }
 
-
-        /// <summary>
-        /// IEnumerable에서 임의의 요소 하나를 반환합니다.
-        /// </summary>
-        /// <typeparam name="T">IEnumerable의 요소 타입입니다.</typeparam>
-        /// <param name="sequence">무작위로 요소를 선택할 IEnumerable입니다.</param>
-        /// <returns>IEnumerable에서 선택된 임의의 요소를 반환합니다.</returns>
+        /// <summary>열거 가능한 항목에서 하나를 같은 확률로 선택합니다.</summary>
         public static T Random<T>(this IEnumerable<T> sequence)
         {
             if (sequence == null)
@@ -34,26 +26,25 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime
             if (sequence is IList<T> list)
             {
                 if (list.Count == 0)
-                    throw new InvalidOperationException("Cannot get a random element from an empty collection.");
+                    throw new InvalidOperationException("빈 컬렉션에서는 항목을 선택할 수 없습니다.");
+
                 return list[UnityEngine.Random.Range(0, list.Count)];
             }
 
-            // 입력이 IList<T>가 아닌 경우(스트림이나 지연 평가(lazy) 시퀀스일 때는) 리저버 샘플링(reservoir sampling) 기법을 사용합니다.
-            using var enumerator = sequence.GetEnumerator();
+            using IEnumerator<T> enumerator = sequence.GetEnumerator();
             if (!enumerator.MoveNext())
-                throw new InvalidOperationException("Cannot get a random element from an empty collection.");
+                throw new InvalidOperationException("빈 컬렉션에서는 항목을 선택할 수 없습니다.");
 
-            T result = enumerator.Current;
+            T selected = enumerator.Current;
             int count = 1;
             while (enumerator.MoveNext())
             {
-                if (UnityEngine.Random.Range(0, ++count) == 0)
-                {
-                    result = enumerator.Current;
-                }
+                count++;
+                if (UnityEngine.Random.Range(0, count) == 0)
+                    selected = enumerator.Current;
             }
 
-            return result;
+            return selected;
         }
     }
 }
