@@ -51,11 +51,16 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime.PoolSystem
             if (prefab == null)
                 throw new ArgumentNullException(nameof(prefab));
 
-            return Spawn(
+            var instance = Spawn(
                 prefab,
                 prefab.transform.position,
                 prefab.transform.rotation,
                 parent);
+
+            if (parent != null)
+                instance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            
+            return instance;
         }
 
         public static void Prewarm(GameObject prefab, int count, int maxSize = DefaultMaxSize)
@@ -110,6 +115,7 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime.PoolSystem
             foreach (GameObjectPool pool in Pools.Values)
                 pool.Clear();
         }
+
         public static void Clear()
         {
             foreach (GameObjectPool pool in Pools.Values)

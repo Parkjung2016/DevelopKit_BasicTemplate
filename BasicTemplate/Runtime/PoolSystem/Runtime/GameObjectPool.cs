@@ -52,24 +52,26 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime.PoolSystem
             Quaternion rotation,
             Transform parent = null)
         {
-            ThrowIfDisposed();
-
-            PooledGameObject marker = pool.Rent();
-            activeInstances.Add(marker);
-            marker.IsRented = true;
-
-            Transform instanceTransform = marker.transform;
-            instanceTransform.SetParent(parent, false);
-            instanceTransform.SetPositionAndRotation(position, rotation);
-            instanceTransform.localScale = marker.DefaultLocalScale;
-
-            marker.gameObject.SetActive(true);
-            marker.NotifySpawned();
-            return marker.gameObject;
+            PooledGameObject marker = Rent(parent);
+            marker.transform.SetPositionAndRotation(position, rotation);
+            return Activate(marker);
         }
 
-        public GameObject Spawn(Transform parent = null) =>
-            Spawn(prefab.transform.position, prefab.transform.rotation, parent);
+        public GameObject Spawn(Transform parent = null)
+        {
+            PooledGameObject marker = Rent(parent);
+            Transform instanceTransform = marker.transform;
+            Transform prefabTransform = prefab.transform;
+            if (parent == null)
+                instanceTransform.SetPositionAndRotation(prefabTransform.position, prefabTransform.rotation);
+            else
+            {
+                instanceTransform.localPosition = prefabTransform.localPosition;
+                instanceTransform.localRotation = prefabTransform.localRotation;
+            }
+
+            return Activate(marker);
+        }
 
         public bool Return(GameObject instance)
         {
@@ -153,6 +155,25 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime.PoolSystem
             instance != null
                 ? instance.GetComponentInParent<PooledGameObject>(true)
                 : null;
+
+        private PooledGameObject Rent(Transform parent)
+        {
+            ThrowIfDisposed();
+
+            PooledGameObject marker = pool.Rent();
+            activeInstances.Add(marker);
+            marker.IsRented = true;
+            marker.transform.SetParent(parent, false);
+            marker.transform.localScale = marker.DefaultLocalScale;
+            return marker;
+        }
+
+        private static GameObject Activate(PooledGameObject marker)
+        {
+            marker.gameObject.SetActive(true);
+            marker.NotifySpawned();
+            return marker.gameObject;
+        }
 
         private PooledGameObject CreateInstance()
         {

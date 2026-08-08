@@ -114,6 +114,24 @@ namespace PJDev.DevelopKit.BasicTemplate.Runtime.PoolSystem.Tests
         }
 
         [Test]
+        public void SpawnWithParent_KeepsPrefabLocalTransform()
+        {
+            GameObject prefab = CreateGameObject("UiPrefab");
+            prefab.transform.localPosition = new Vector3(12f, 8f, 0f);
+            prefab.transform.localRotation = Quaternion.Euler(0f, 0f, 15f);
+            prefab.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
+
+            GameObject parent = CreateGameObject("Parent");
+            parent.transform.position = new Vector3(100f, 50f, 0f);
+
+            GameObject instance = PrefabPool.Spawn(prefab, parent.transform);
+
+            Assert.That(instance.transform.localPosition, Is.EqualTo(prefab.transform.localPosition));
+            Assert.That(instance.transform.localRotation, Is.EqualTo(prefab.transform.localRotation));
+            Assert.That(instance.transform.localScale, Is.EqualTo(prefab.transform.localScale));
+        }
+
+        [Test]
         public void PrefabPool_PrewarmSpawnReleaseAndStats()
         {
             GameObject prefab = CreateGameObject("ProjectilePrefab");
